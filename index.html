@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AutoTrack Pro - Vehicle Maintenance</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -30,37 +30,29 @@
     <style>
         body {
             -webkit-font-smoothing: antialiased;
-            background-color: #F1F5F9; /* Light mode default bg */
+            background-color: #F1F5F9;
             color: #0F172A;
         }
-        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .progress-bar-fill {
-            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease;
-        }
-
+        .progress-bar-fill { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s ease; }
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; margin: 0; 
-        }
-        
-        /* Hide scrollbar for tabs */
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Modal Animation */
         .modal-active { opacity: 1; pointer-events: auto; }
         .modal-inactive { opacity: 0; pointer-events: none; }
         .modal-content-active { transform: scale(1); }
         .modal-content-inactive { transform: scale(0.95); }
+        .view-enter { animation: fadeUp 0.4s ease forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .ring-bg { stroke: #e2e8f0; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <main class="w-full max-w-md md:max-w-3xl lg:max-w-4xl flex-grow flex flex-col relative pb-20 md:pb-6 bg-white shadow-xl min-h-screen">
+    <main class="w-full max-w-md md:max-w-3xl lg:max-w-4xl flex-grow flex flex-col relative pb-24 bg-white shadow-xl min-h-screen">
         
         <!-- Header -->
         <header class="p-4 flex justify-between items-center sticky top-0 bg-white/90 backdrop-blur-md z-30 border-b border-slate-200">
@@ -71,16 +63,11 @@
                 <p class="text-[10px] text-slate-500 mt-0.5" id="lblSubtitle">Manajer Kendaraan Pribadi</p>
             </div>
             <div class="flex gap-2">
-                <!-- Lang Toggle -->
-                <button onclick="toggleLang()" class="w-9 h-9 rounded-full bg-slate-50 shadow-sm flex items-center justify-center border border-slate-200 hover:bg-slate-100 transition text-sm font-bold text-slate-600" id="btnLang">
-                    EN
-                </button>
-                <!-- Data Menu Toggle -->
+                <button onclick="toggleLang()" class="w-9 h-9 rounded-full bg-slate-50 shadow-sm flex items-center justify-center border border-slate-200 hover:bg-slate-100 transition text-sm font-bold text-slate-600" id="btnLang">EN</button>
                 <div class="relative">
                     <button onclick="toggleDataMenu()" class="w-9 h-9 rounded-full bg-slate-50 shadow-sm flex items-center justify-center border border-slate-200 hover:bg-slate-100 transition text-slate-600">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
-                    <!-- Dropdown -->
                     <div id="dataMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 hidden overflow-hidden z-50">
                         <button onclick="exportData(); toggleDataMenu();" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 border-b border-slate-100 flex items-center gap-3">
                             <i class="fa-solid fa-download text-brand"></i> <span id="lblSave">Simpan JSON</span>
@@ -88,8 +75,11 @@
                         <button onclick="document.getElementById('fileInput').click(); toggleDataMenu();" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 border-b border-slate-100 flex items-center gap-3">
                             <i class="fa-solid fa-upload text-warning"></i> <span id="lblLoad">Muat JSON</span>
                         </button>
-                        <button onclick="shareData(); toggleDataMenu();" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 flex items-center gap-3">
+                        <button onclick="shareData(); toggleDataMenu();" class="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 border-b border-slate-100 flex items-center gap-3">
                             <i class="fa-brands fa-bluetooth text-blue-500"></i> <span id="lblShare">Share / Bluetooth</span>
+                        </button>
+                        <button onclick="resetAll(); toggleDataMenu();" class="w-full text-left px-4 py-3 text-sm hover:bg-red-50 flex items-center gap-3 text-danger">
+                            <i class="fa-solid fa-trash"></i> <span id="lblReset">Hapus Semua</span>
                         </button>
                     </div>
                 </div>
@@ -98,18 +88,36 @@
         </header>
 
         <!-- Content Area -->
-        <div class="p-5 flex-grow flex flex-col bg-surface" id="mainContent">
-            <!-- Rendered by JS -->
-        </div>
-
+        <div class="p-5 flex-grow flex flex-col bg-surface" id="mainContent"></div>
     </main>
 
-    <!-- Modal: Add Vehicle -->
+    <!-- Bottom Navigation -->
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-3xl lg:max-w-4xl bg-white/95 backdrop-blur-md border-t border-slate-200 z-40 hidden">
+        <div class="grid grid-cols-4">
+            <button onclick="switchView('dashboard')" data-nav="dashboard" class="nav-btn flex flex-col items-center justify-center py-2.5 gap-1 transition">
+                <i class="fa-solid fa-gauge-high text-lg"></i>
+                <span class="text-[10px] font-semibold" id="navDash">Beranda</span>
+            </button>
+            <button onclick="switchView('history')" data-nav="history" class="nav-btn flex flex-col items-center justify-center py-2.5 gap-1 transition">
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <span class="text-[10px] font-semibold" id="navHist">Riwayat</span>
+            </button>
+            <button onclick="switchView('fuel')" data-nav="fuel" class="nav-btn flex flex-col items-center justify-center py-2.5 gap-1 transition">
+                <i class="fa-solid fa-gas-pump text-lg"></i>
+                <span class="text-[10px] font-semibold" id="navFuel">BBM</span>
+            </button>
+            <button onclick="switchView('stats')" data-nav="stats" class="nav-btn flex flex-col items-center justify-center py-2.5 gap-1 transition">
+                <i class="fa-solid fa-chart-pie text-lg"></i>
+                <span class="text-[10px] font-semibold" id="navStats">Statistik</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal: Add/Edit Vehicle -->
     <div id="addVehicleModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 modal-inactive transition-all duration-300 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300 max-h-[90vh] overflow-y-auto">
             <h3 class="text-xl font-bold mb-1 text-slate-900" id="mAddTitle">Tambah Kendaraan</h3>
             <p class="text-sm text-slate-500 mb-5" id="mAddDesc">Masukkan data awal kendaraan Anda.</p>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblType">Tipe Kendaraan</label>
@@ -128,12 +136,21 @@
                         <input type="text" id="vModel" placeholder="Beat / NMAX" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblPlate">Plat Nomor</label>
+                        <input type="text" id="vPlate" placeholder="B 1234 XYZ" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblYear">Tahun</label>
+                        <input type="number" id="vYear" placeholder="2022" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand font-mono">
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblOdo">Odometer Saat Ini (KM)</label>
                     <input type="number" id="vOdo" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand font-mono">
                 </div>
             </div>
-
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModal('addVehicleModal')" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 py-2.5 rounded-xl font-medium transition text-slate-700" id="btnCancelAdd">Batal</button>
                 <button onclick="saveNewVehicle()" class="flex-1 bg-brand hover:bg-brandHover text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-blue-500/30" id="btnSaveAdd">Simpan</button>
@@ -146,15 +163,14 @@
         <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
             <h3 class="text-xl font-bold mb-1 text-slate-900" id="mTripTitle">Catat Perjalanan</h3>
             <p class="text-sm text-slate-500 mb-6" id="mTripDesc">Tambahkan jarak tempuh baru.</p>
-            
-            <div class="mb-6">
+            <div class="mb-4">
                 <label class="block text-sm font-medium text-slate-600 mb-2" id="lblTripInput">Jarak Tempuh (KM)</label>
                 <div class="relative">
                     <input type="number" id="tripDistance" placeholder="45" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-3 px-4 text-slate-900 focus:outline-none focus:border-brand transition font-mono text-lg">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 font-mono">KM</div>
                 </div>
+                <p class="text-[11px] text-slate-400 mt-2" id="lblTripHint"></p>
             </div>
-
             <div class="flex gap-3">
                 <button onclick="closeModal('tripModal')" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 py-3 rounded-xl font-medium transition text-slate-700" id="btnCancelTrip">Batal</button>
                 <button onclick="saveTrip()" class="flex-1 bg-brand hover:bg-brandHover text-white py-3 rounded-xl font-medium transition shadow-lg shadow-blue-500/30" id="btnSaveTrip">Simpan</button>
@@ -162,20 +178,15 @@
         </div>
     </div>
 
-    <!-- Modal: Checklist / Service Recommendation (NEW FEATURE) -->
+    <!-- Modal: Recommendation -->
     <div id="recommendationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] modal-inactive transition-all duration-300 flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
             <div class="flex items-center gap-3 mb-2 text-warning">
                 <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
                 <h3 class="text-xl font-bold text-slate-900" id="mRecTitle">Peringatan Servis</h3>
             </div>
-            <p class="text-sm text-slate-500 mb-5" id="mRecDesc">Komponen berikut perlu segera diganti berdasarkan jarak tempuh terbaru:</p>
-            
-            <!-- Dynamic Checklist Container -->
-            <div id="recList" class="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2">
-                <!-- Rendered by JS -->
-            </div>
-
+            <p class="text-sm text-slate-500 mb-5" id="mRecDesc">Komponen berikut perlu segera diganti:</p>
+            <div id="recList" class="space-y-3 mb-6 max-h-60 overflow-y-auto pr-2"></div>
             <div class="flex gap-3">
                 <button onclick="closeModal('recommendationModal')" class="w-full bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 py-3 rounded-xl font-semibold transition" id="btnRecClose">Tutup & Cek Nanti</button>
             </div>
@@ -184,34 +195,96 @@
 
     <!-- Modal: Replace Component -->
     <div id="replaceModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] modal-inactive transition-all duration-300 flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-1">
                 <h3 class="text-xl font-bold text-slate-900" id="mReplaceTitle">Servis / Ganti</h3>
                 <i class="fa-solid fa-wrench text-slate-400"></i>
             </div>
             <p class="text-sm text-slate-500 mb-5" id="mReplaceDesc">Catat penggantian suku cadang baru.</p>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblRepQuality">Kualitas / Tipe (Otomatis Ubah KM)</label>
-                    <select id="repSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
-                        <!-- Options filled via JS -->
-                    </select>
+                    <select id="repSelect" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand"></select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblRepNote">Merek / Spesifikasi (Opsional)</label>
-                    <input type="text" id="repNote" placeholder="Misal: Motul 10W-40 / Bimoli" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
+                    <input type="text" id="repNote" placeholder="Misal: Motul 10W-40" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblRepCost">Biaya (Rp) - Opsional</label>
+                    <input type="number" id="repCost" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand font-mono">
                 </div>
             </div>
-
             <div class="flex gap-3 mt-6">
                 <button onclick="closeModal('replaceModal')" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 py-2.5 rounded-xl font-medium transition text-slate-700" id="btnCancelRep">Batal</button>
-                <button onclick="saveReplacement()" class="flex-1 bg-success hover:bg-emerald-600 text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-emerald-500/30" id="btnSaveRep">Simpan Penggantian</button>
+                <button onclick="saveReplacement()" class="flex-1 bg-success hover:bg-emerald-600 text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-emerald-500/30" id="btnSaveRep">Simpan</button>
             </div>
         </div>
     </div>
 
-    <!-- Notification Toast -->
+    <!-- Modal: Fuel -->
+    <div id="fuelModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] modal-inactive transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="text-xl font-bold text-slate-900" id="mFuelTitle">Isi BBM</h3>
+                <i class="fa-solid fa-gas-pump text-slate-400"></i>
+            </div>
+            <p class="text-sm text-slate-500 mb-5" id="mFuelDesc">Catat pengisian bahan bakar.</p>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblFuelLiters">Volume (Liter)</label>
+                        <input type="number" id="fuelLiters" placeholder="5.0" step="0.01" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblFuelCost">Total Biaya (Rp)</label>
+                        <input type="number" id="fuelCost" placeholder="50000" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand font-mono">
+                    </div>
+                </div>
+                <label class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="fuelFull" checked class="w-5 h-5 accent-brand">
+                    <span class="text-sm text-slate-700" id="lblFuelFull">Tangki Penuh (untuk hitung efisiensi)</span>
+                </label>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal('fuelModal')" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 py-2.5 rounded-xl font-medium transition text-slate-700" id="btnCancelFuel">Batal</button>
+                <button onclick="saveFuel()" class="flex-1 bg-brand hover:bg-brandHover text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-blue-500/30" id="btnSaveFuel">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Document -->
+    <div id="docModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] modal-inactive transition-all duration-300 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 border border-slate-200 shadow-2xl modal-content-inactive transition-transform duration-300">
+            <div class="flex items-center justify-between mb-1">
+                <h3 class="text-xl font-bold text-slate-900" id="mDocTitle">Dokumen & Pajak</h3>
+                <i class="fa-solid fa-file-shield text-slate-400"></i>
+            </div>
+            <p class="text-sm text-slate-500 mb-5" id="mDocDesc">Pengingat tanggal kedaluwarsa.</p>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblDocName">Nama Dokumen</label>
+                    <select id="docName" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
+                        <option value="pajak">Pajak Tahunan (STNK)</option>
+                        <option value="stnk5">Perpanjangan STNK (5 Thn)</option>
+                        <option value="asuransi">Asuransi</option>
+                        <option value="sim">SIM</option>
+                        <option value="kir">KIR / Uji Berkala</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1" id="lblDocDate">Tanggal Kedaluwarsa</label>
+                    <input type="date" id="docDate" class="w-full bg-slate-50 border border-slate-300 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-brand">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeModal('docModal')" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 py-2.5 rounded-xl font-medium transition text-slate-700" id="btnCancelDoc">Batal</button>
+                <button onclick="saveDoc()" class="flex-1 bg-brand hover:bg-brandHover text-white py-2.5 rounded-xl font-medium transition shadow-lg shadow-blue-500/30" id="btnSaveDoc">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
     <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl font-medium text-sm flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-[70] translate-y-[-20px]">
         <i class="fa-solid fa-circle-check text-success"></i>
         <span id="toastMsg">Notifikasi</span>
@@ -222,398 +295,421 @@
         const i18n = {
             id: {
                 subtitle: "Manajer Kendaraan Pribadi",
-                emptyTitle: "Belum Ada Kendaraan",
-                emptyDesc: "Mulai lacak kesehatan komponen kendaraan Anda. Tambahkan kendaraan pertama Anda sekarang.",
-                btnAdd: "+ Tambah Kendaraan",
-                activeBadge: "Kendaraan Aktif",
-                totalOdo: "Total Odometer",
-                btnTrip: "+ Trip",
-                statusTitle: "Status Komponen",
-                statusDesc: "Berdasarkan Jarak Tempuh",
-                statusGood: "Kondisi Baik",
-                statusWarn: "Perlu Perhatian",
-                statusCrit: "Segera Ganti",
-                left: "Sisa",
-                over: "Lewat",
-                mAddTitle: "Tambah Kendaraan",
-                mAddDesc: "Masukkan data awal kendaraan Anda.",
-                lblType: "Tipe Kendaraan",
-                lblBrand: "Merek",
-                lblModel: "Model",
-                lblOdo: "Odometer (KM)",
-                btnCancel: "Batal",
-                btnSave: "Simpan",
-                mTripTitle: "Catat Perjalanan",
-                mTripDesc: "Tambahkan jarak tempuh untuk menghitung keausan otomatis.",
-                lblTripInput: "Jarak Tempuh (KM)",
-                lblSave: "Simpan JSON",
-                lblLoad: "Muat JSON",
-                lblShare: "Share / Bluetooth",
-                msgTripSaved: "Perjalanan dicatat!",
-                msgImportOk: "Data berhasil dimuat!",
-                msgImportErr: "Gagal memuat file JSON.",
-                msgShareOk: "Menu bagikan dibuka.",
-                msgShareErr: "Browser tidak mendukung fitur Share.",
-                typeMotor: "Sepeda Motor",
-                typeCar: "Mobil",
-                mReplaceTitle: "Servis / Ganti",
-                mReplaceDesc: "Catat penggantian suku cadang baru.",
-                lblRepQuality: "Tipe / Kualitas (Ubah Durasi KM)",
-                lblRepNote: "Merek / Spesifikasi (Opsional)",
-                msgReplaced: "Komponen berhasil diperbarui!",
-                
-                // New Dictionary for Recommendation System
-                mRecTitle: "Peringatan Servis",
-                mRecDesc: "Komponen berikut perlu segera diganti berdasarkan jarak tempuh terbaru:",
-                btnRecClose: "Tutup & Cek Nanti",
-                btnRecFix: "Ganti"
+                emptyTitle: "Belum Ada Kendaraan", emptyDesc: "Mulai lacak kesehatan komponen kendaraan Anda.",
+                btnAdd: "+ Tambah Kendaraan", activeBadge: "Kendaraan Aktif", totalOdo: "Total Odometer",
+                btnTrip: "+ Trip", statusTitle: "Status Komponen", statusDesc: "Berdasarkan Jarak Tempuh",
+                statusGood: "Kondisi Baik", statusWarn: "Perlu Perhatian", statusCrit: "Segera Ganti",
+                left: "Sisa", over: "Lewat", mAddTitle: "Tambah Kendaraan", mAddDesc: "Masukkan data awal kendaraan Anda.",
+                lblType: "Tipe Kendaraan", lblBrand: "Merek", lblModel: "Model", lblOdo: "Odometer (KM)",
+                lblPlate: "Plat Nomor", lblYear: "Tahun", btnCancel: "Batal", btnSave: "Simpan",
+                mTripTitle: "Catat Perjalanan", mTripDesc: "Tambahkan jarak tempuh untuk hitung keausan otomatis.",
+                lblTripInput: "Jarak Tempuh (KM)", lblSave: "Simpan JSON", lblLoad: "Muat JSON",
+                lblShare: "Share / Bluetooth", lblReset: "Hapus Semua", msgTripSaved: "Perjalanan dicatat!",
+                msgImportOk: "Data berhasil dimuat!", msgImportErr: "Gagal memuat file JSON.",
+                msgShareOk: "Menu bagikan dibuka.", msgShareErr: "Browser tidak mendukung Share.",
+                typeMotor: "Sepeda Motor", typeCar: "Mobil", mReplaceTitle: "Servis / Ganti",
+                mReplaceDesc: "Catat penggantian suku cadang baru.", lblRepQuality: "Tipe / Kualitas (Ubah Durasi KM)",
+                lblRepNote: "Merek / Spesifikasi (Opsional)", lblRepCost: "Biaya (Rp) - Opsional",
+                msgReplaced: "Komponen berhasil diperbarui!", mRecTitle: "Peringatan Servis",
+                mRecDesc: "Komponen berikut perlu segera diganti:", btnRecClose: "Tutup & Cek Nanti", btnRecFix: "Ganti",
+                navDash: "Beranda", navHist: "Riwayat", navFuel: "BBM", navStats: "Statistik",
+                histTitle: "Riwayat Servis", histEmpty: "Belum ada riwayat servis.",
+                fuelTitle: "Catatan Bahan Bakar", fuelEmpty: "Belum ada catatan pengisian.", btnAddFuel: "+ Isi BBM",
+                mFuelTitle: "Isi BBM", mFuelDesc: "Catat pengisian bahan bakar.", lblFuelLiters: "Volume (Liter)",
+                lblFuelCost: "Total Biaya (Rp)", lblFuelFull: "Tangki Penuh (untuk hitung efisiensi)",
+                msgFuelSaved: "Pengisian BBM dicatat!", statsTitle: "Statistik & Ringkasan",
+                healthScore: "Skor Kesehatan", totalSpent: "Total Pengeluaran", fuelSpent: "Biaya BBM",
+                serviceSpent: "Biaya Servis", avgEff: "Efisiensi Rata-rata", lastEff: "Efisiensi Terakhir",
+                noEff: "Belum ada data", docTitle: "Dokumen & Pajak", docEmpty: "Belum ada dokumen terdaftar.",
+                btnAddDoc: "+ Dokumen", mDocTitle: "Dokumen & Pajak", mDocDesc: "Pengingat tanggal kedaluwarsa.",
+                lblDocName: "Nama Dokumen", lblDocDate: "Tanggal Kedaluwarsa", msgDocSaved: "Dokumen disimpan!",
+                docExpired: "Kedaluwarsa", docDays: "hari lagi", editVehicle: "Edit", deleteVehicle: "Hapus Kendaraan",
+                confirmDelete: "Hapus kendaraan ini beserta seluruh datanya?", msgVehDeleted: "Kendaraan dihapus.",
+                confirmReset: "Hapus SEMUA data? Tindakan ini tidak bisa dibatalkan.", msgVehAdded: "Kendaraan ditambahkan!",
+                msgVehUpdated: "Kendaraan diperbarui!", tripHint: "Odometer baru:", costLabel: "Biaya",
+                fillsCount: "Total Pengisian", totalKm: "Jarak Sejak Awal", docPajak: "Pajak Tahunan (STNK)",
+                docStnk5: "Perpanjangan STNK (5 Thn)", docAsuransi: "Asuransi", docSim: "SIM", docKir: "KIR / Uji Berkala"
             },
             en: {
                 subtitle: "Personal Vehicle Manager",
-                emptyTitle: "No Vehicles Yet",
-                emptyDesc: "Start tracking your vehicle's component health. Add your first vehicle now.",
-                btnAdd: "+ Add Vehicle",
-                activeBadge: "Active Vehicle",
-                totalOdo: "Total Odometer",
-                btnTrip: "+ Trip",
-                statusTitle: "Component Status",
-                statusDesc: "Based on Mileage",
-                statusGood: "Good Condition",
-                statusWarn: "Needs Attention",
-                statusCrit: "Replace Soon",
-                left: "Left",
-                over: "Over",
-                mAddTitle: "Add Vehicle",
-                mAddDesc: "Enter your initial vehicle data.",
-                lblType: "Vehicle Type",
-                lblBrand: "Brand",
-                lblModel: "Model",
-                lblOdo: "Current Odo (KM)",
-                btnCancel: "Cancel",
-                btnSave: "Save",
-                mTripTitle: "Record Trip",
-                mTripDesc: "Add mileage to calculate automatic wear and tear.",
-                lblTripInput: "Distance (KM)",
-                lblSave: "Save JSON",
-                lblLoad: "Load JSON",
-                lblShare: "Share / Bluetooth",
-                msgTripSaved: "Trip recorded!",
-                msgImportOk: "Data loaded successfully!",
-                msgImportErr: "Failed to load JSON file.",
-                msgShareOk: "Share menu opened.",
-                msgShareErr: "Browser doesn't support Web Share.",
-                typeMotor: "Motorcycle",
-                typeCar: "Car",
-                mReplaceTitle: "Replace Part",
-                mReplaceDesc: "Record new part installation.",
-                lblRepQuality: "Type / Quality (Changes KM Duration)",
-                lblRepNote: "Brand / Specification (Optional)",
-                msgReplaced: "Component successfully updated!",
-
-                // New Dictionary for Recommendation System
-                mRecTitle: "Service Warning",
-                mRecDesc: "The following components require replacement based on the latest mileage:",
-                btnRecClose: "Close & Check Later",
-                btnRecFix: "Replace"
+                emptyTitle: "No Vehicles Yet", emptyDesc: "Start tracking your vehicle's component health.",
+                btnAdd: "+ Add Vehicle", activeBadge: "Active Vehicle", totalOdo: "Total Odometer",
+                btnTrip: "+ Trip", statusTitle: "Component Status", statusDesc: "Based on Mileage",
+                statusGood: "Good Condition", statusWarn: "Needs Attention", statusCrit: "Replace Soon",
+                left: "Left", over: "Over", mAddTitle: "Add Vehicle", mAddDesc: "Enter your initial vehicle data.",
+                lblType: "Vehicle Type", lblBrand: "Brand", lblModel: "Model", lblOdo: "Current Odo (KM)",
+                lblPlate: "Plate No.", lblYear: "Year", btnCancel: "Cancel", btnSave: "Save",
+                mTripTitle: "Record Trip", mTripDesc: "Add mileage to calculate automatic wear and tear.",
+                lblTripInput: "Distance (KM)", lblSave: "Save JSON", lblLoad: "Load JSON",
+                lblShare: "Share / Bluetooth", lblReset: "Delete All", msgTripSaved: "Trip recorded!",
+                msgImportOk: "Data loaded successfully!", msgImportErr: "Failed to load JSON file.",
+                msgShareOk: "Share menu opened.", msgShareErr: "Browser doesn't support Web Share.",
+                typeMotor: "Motorcycle", typeCar: "Car", mReplaceTitle: "Replace Part",
+                mReplaceDesc: "Record new part installation.", lblRepQuality: "Type / Quality (Changes KM Duration)",
+                lblRepNote: "Brand / Specification (Optional)", lblRepCost: "Cost (Rp) - Optional",
+                msgReplaced: "Component successfully updated!", mRecTitle: "Service Warning",
+                mRecDesc: "The following components require replacement:", btnRecClose: "Close & Check Later", btnRecFix: "Replace",
+                navDash: "Home", navHist: "History", navFuel: "Fuel", navStats: "Stats",
+                histTitle: "Service History", histEmpty: "No service history yet.",
+                fuelTitle: "Fuel Log", fuelEmpty: "No fuel records yet.", btnAddFuel: "+ Add Fuel",
+                mFuelTitle: "Add Fuel", mFuelDesc: "Record a fuel-up.", lblFuelLiters: "Volume (Liters)",
+                lblFuelCost: "Total Cost (Rp)", lblFuelFull: "Full Tank (for efficiency calc)",
+                msgFuelSaved: "Fuel-up recorded!", statsTitle: "Statistics & Summary",
+                healthScore: "Health Score", totalSpent: "Total Spending", fuelSpent: "Fuel Cost",
+                serviceSpent: "Service Cost", avgEff: "Average Efficiency", lastEff: "Last Efficiency",
+                noEff: "No data yet", docTitle: "Documents & Tax", docEmpty: "No documents registered.",
+                btnAddDoc: "+ Document", mDocTitle: "Documents & Tax", mDocDesc: "Expiry date reminders.",
+                lblDocName: "Document Name", lblDocDate: "Expiry Date", msgDocSaved: "Document saved!",
+                docExpired: "Expired", docDays: "days left", editVehicle: "Edit", deleteVehicle: "Delete Vehicle",
+                confirmDelete: "Delete this vehicle and all its data?", msgVehDeleted: "Vehicle deleted.",
+                confirmReset: "Delete ALL data? This cannot be undone.", msgVehAdded: "Vehicle added!",
+                msgVehUpdated: "Vehicle updated!", tripHint: "New odometer:", costLabel: "Cost",
+                fillsCount: "Total Fill-ups", totalKm: "Distance Since Start", docPajak: "Annual Tax",
+                docStnk5: "Registration Renewal (5 Yr)", docAsuransi: "Insurance", docSim: "Driver License", docKir: "Periodic Inspection"
             }
         };
 
-        // --- DYNAMIC INTERVAL OPTIONS ---
-        const intervalDatabase = {
-            motor: {
-                oil: [
-                    { labelId: "Mineral (Standar)", labelEn: "Mineral (Standard)", km: 2000 },
-                    { labelId: "Semi Synthetic", labelEn: "Semi Synthetic", km: 3000 },
-                    { labelId: "Full Synthetic", labelEn: "Full Synthetic", km: 5000 },
-                    { labelId: "Minyak Goreng (Darurat!)", labelEn: "Cooking Oil (Emergency!)", km: 1000 }
-                ],
-                brake: [
-                    { labelId: "Standar / OEM", labelEn: "Standard / OEM", km: 12000 },
-                    { labelId: "Soft Compound (Racing)", labelEn: "Soft Compound (Racing)", km: 8000 },
-                    { labelId: "Hard Compound (Awet)", labelEn: "Hard Compound (Durable)", km: 15000 }
-                ],
-                trans: [
-                    { labelId: "Oli Gardan Standar", labelEn: "Standard Gear Oil", km: 8000 },
-                    { labelId: "Oli Gardan Premium", labelEn: "Premium Gear Oil", km: 12000 }
-                ],
-                general: [
-                    { labelId: "Suku Cadang Asli", labelEn: "Genuine Part", km: 20000 },
-                    { labelId: "Suku Cadang Aftermarket", labelEn: "Aftermarket Part", km: 15000 }
-                ],
-                filter: [
-                    { labelId: "Filter Kertas Standar", labelEn: "Standard Paper Filter", km: 15000 },
-                    { labelId: "Filter Udara Racing (Busa/Baja)", labelEn: "Racing Air Filter", km: 10000 }
-                ],
-                sparkplug: [
-                    { labelId: "Busi Standar (Nikel)", labelEn: "Standard Plug (Nickel)", km: 8000 },
-                    { labelId: "Busi Iridium / Platinum", labelEn: "Iridium / Platinum Plug", km: 25000 }
-                ]
-            },
-            mobil: {
-                oil: [
-                    { labelId: "Mineral (Standar)", labelEn: "Mineral (Standard)", km: 5000 },
-                    { labelId: "Semi Synthetic", labelEn: "Semi Synthetic", km: 7500 },
-                    { labelId: "Full Synthetic", labelEn: "Full Synthetic", km: 10000 },
-                    { labelId: "Minyak Goreng (Darurat!)", labelEn: "Cooking Oil (Emergency!)", km: 1000 }
-                ],
-                brake: [
-                    { labelId: "Standar / OEM", labelEn: "Standard / OEM", km: 30000 },
-                    { labelId: "Soft Compound (Pakem)", labelEn: "Soft Compound", km: 20000 },
-                    { labelId: "Hard Compound (Awet)", labelEn: "Hard Compound", km: 45000 }
-                ],
-                trans: [
-                    { labelId: "ATF / CVTF (Standar Pabrik)", labelEn: "ATF / CVTF OEM", km: 40000 },
-                    { labelId: "Oli Transmisi Manual", labelEn: "Manual Gear Oil", km: 40000 },
-                    { labelId: "ATF Long Life", labelEn: "Long Life ATF", km: 80000 }
-                ],
-                general: [
-                    { labelId: "Suku Cadang Asli", labelEn: "Genuine Part", km: 40000 },
-                    { labelId: "Suku Cadang Aftermarket", labelEn: "Aftermarket Part", km: 30000 }
-                ],
-                filter: [
-                    { labelId: "Filter Kertas Standar", labelEn: "Standard Paper Filter", km: 20000 },
-                    { labelId: "Filter Udara Racing (Busa/Baja)", labelEn: "Racing Air Filter", km: 15000 }
-                ],
-                sparkplug: [
-                    { labelId: "Busi Standar (Nikel)", labelEn: "Standard Plug (Nickel)", km: 20000 },
-                    { labelId: "Busi Iridium / Platinum", labelEn: "Iridium / Platinum Plug", km: 40000 }
-                ]
-            }
-        };
+const intervalDatabase = {
+    motor: {
+        oil:         [{labelId:"Mineral (Standar)",labelEn:"Mineral (Standard)",km:2000},{labelId:"Semi Synthetic",labelEn:"Semi Synthetic",km:3000},{labelId:"Full Synthetic",labelEn:"Full Synthetic",km:5000},{labelId:"Minyak Goreng (Darurat!)",labelEn:"Cooking Oil (Emergency!)",km:1000}],
+        brake:       [{labelId:"Standar / OEM",labelEn:"Standard / OEM",km:12000},{labelId:"Soft Compound (Racing)",labelEn:"Soft Compound (Racing)",km:8000},{labelId:"Hard Compound (Awet)",labelEn:"Hard Compound (Durable)",km:15000}],
+        trans:       [{labelId:"Oli Gardan Standar",labelEn:"Standard Gear Oil",km:8000},{labelId:"Oli Gardan Premium",labelEn:"Premium Gear Oil",km:12000}],
+        general:     [{labelId:"Suku Cadang Asli",labelEn:"Genuine Part",km:20000},{labelId:"Suku Cadang Aftermarket",labelEn:"Aftermarket Part",km:15000}],
+        filter:      [{labelId:"Filter Kertas Standar",labelEn:"Standard Paper Filter",km:15000},{labelId:"Filter Udara Racing",labelEn:"Racing Air Filter",km:10000}],
+        sparkplug:   [{labelId:"Busi Standar (Nikel)",labelEn:"Standard Plug (Nickel)",km:8000},{labelId:"Busi Iridium / Platinum",labelEn:"Iridium / Platinum Plug",km:25000}],
+        coolant:     [{labelId:"Coolant Standar",labelEn:"Standard Coolant",km:20000},{labelId:"Coolant Long Life",labelEn:"Long Life Coolant",km:40000}],
+        battery:     [{labelId:"Aki Basah (Standar)",labelEn:"Wet Battery (Standard)",km:20000},{labelId:"Aki Kering / MF",labelEn:"Dry / MF Battery",km:30000},{labelId:"Aki Lithium",labelEn:"Lithium Battery",km:50000}],
+        chain:       [{labelId:"Rantai Standar",labelEn:"Standard Chain",km:20000},{labelId:"Rantai O-Ring",labelEn:"O-Ring Chain",km:30000},{labelId:"Rantai X-Ring",labelEn:"X-Ring Chain",km:40000}],
+        clutch:      [{labelId:"Kampas Kopling Standar",labelEn:"Standard Clutch Plates",km:20000},{labelId:"Kampas Kopling Racing",labelEn:"Racing Clutch Plates",km:15000}],
+        fuel_filter: [{labelId:"Filter Bensin Standar",labelEn:"Standard Fuel Filter",km:20000},{labelId:"Filter Bensin Premium",labelEn:"Premium Fuel Filter",km:30000}],
+        suspension:  [{labelId:"Oli Shockbreaker Standar",labelEn:"Standard Fork Oil",km:20000},{labelId:"Oli Shockbreaker Premium",labelEn:"Premium Fork Oil",km:30000}],
+        brake_fluid: [{labelId:"Minyak Rem DOT 3",labelEn:"Brake Fluid DOT 3",km:10000},{labelId:"Minyak Rem DOT 4",labelEn:"Brake Fluid DOT 4",km:15000}],
+        oil_filter: [
+            {labelId:"Filter Oli Standar",labelEn:"Standard Oil Filter",km:8000},
+            {labelId:"Filter Oli Premium",labelEn:"Premium Oil Filter",km:12000}
+        ],
 
-        // --- COMPONENT TEMPLATES ---
-        const defaultComponents = {
-            motor: [
-                { id: 'c1', nameId: 'Oli Mesin', nameEn: 'Engine Oil', icon: 'fa-oil-can', typeKey: 'oil', spec: 'Standar Pabrik', interval: 2000, lastChangedAt: 0 },
-                { id: 'c2', nameId: 'Oli CVT / Gardan', nameEn: 'Gear Oil', icon: 'fa-gear', typeKey: 'trans', spec: 'Standar Pabrik', interval: 8000, lastChangedAt: 0 },
-                { id: 'c3', nameId: 'Kampas Rem', nameEn: 'Brake Pads', icon: 'fa-compact-disc', typeKey: 'brake', spec: 'Standar Pabrik', interval: 12000, lastChangedAt: 0 },
-                { id: 'c4', nameId: 'Ban', nameEn: 'Tires', icon: 'fa-circle-notch', typeKey: 'general', spec: 'Standar Pabrik', interval: 15000, lastChangedAt: 0 },
-                { id: 'c5', nameId: 'V-Belt / Rantai', nameEn: 'Belt / Chain', icon: 'fa-infinity', typeKey: 'general', spec: 'Standar Pabrik', interval: 20000, lastChangedAt: 0 },
-                { id: 'c6', nameId: 'Filter Udara', nameEn: 'Air Filter', icon: 'fa-fan', typeKey: 'filter', spec: 'Standar Pabrik', interval: 15000, lastChangedAt: 0 },
-                { id: 'c7', nameId: 'Busi', nameEn: 'Spark Plug', icon: 'fa-bolt', typeKey: 'sparkplug', spec: 'Standar Pabrik', interval: 8000, lastChangedAt: 0 }
-            ],
-            mobil: [
-                { id: 'c1', nameId: 'Oli Mesin', nameEn: 'Engine Oil', icon: 'fa-oil-can', typeKey: 'oil', spec: 'Standar Pabrik', interval: 5000, lastChangedAt: 0 },
-                { id: 'c2', nameId: 'Oli Transmisi (AT/MT)', nameEn: 'Transmission Fluid', icon: 'fa-gear', typeKey: 'trans', spec: 'Standar Pabrik', interval: 40000, lastChangedAt: 0 },
-                { id: 'c3', nameId: 'Filter Oli', nameEn: 'Oil Filter', icon: 'fa-filter', typeKey: 'general', spec: 'Standar Pabrik', interval: 10000, lastChangedAt: 0 },
-                { id: 'c4', nameId: 'Kampas Rem', nameEn: 'Brake Pads', icon: 'fa-compact-disc', typeKey: 'brake', spec: 'Standar Pabrik', interval: 30000, lastChangedAt: 0 },
-                { id: 'c5', nameId: 'Ban', nameEn: 'Tires', icon: 'fa-circle-notch', typeKey: 'general', spec: 'Standar Pabrik', interval: 40000, lastChangedAt: 0 },
-                { id: 'c6', nameId: 'Filter Udara', nameEn: 'Air Filter', icon: 'fa-fan', typeKey: 'filter', spec: 'Standar Pabrik', interval: 20000, lastChangedAt: 0 },
-                { id: 'c7', nameId: 'Busi', nameEn: 'Spark Plug', icon: 'fa-bolt', typeKey: 'sparkplug', spec: 'Standar Pabrik', interval: 20000, lastChangedAt: 0 }
-            ]
-        };
+        fork_seal: [
+            {labelId:"Seal Shock Standar",labelEn:"Standard Fork Seal",km:30000},
+            {labelId:"Seal Shock OEM",labelEn:"OEM Fork Seal",km:40000}
+        ],
+
+        steering_bearing: [
+            {labelId:"Laher Bola Standar",labelEn:"Standard Ball Bearing",km:30000},
+            {labelId:"Laher Taper Roller",labelEn:"Taper Roller Bearing",km:50000}
+        ],
+
+        wheel_bearing: [
+            {labelId:"Bearing Standar",labelEn:"Standard Wheel Bearing",km:30000},
+            {labelId:"Bearing Premium",labelEn:"Premium Wheel Bearing",km:50000}
+        ],
+
+        valve_clearance: [
+            {labelId:"Mesin Harian",labelEn:"Daily Use Engine",km:24000},
+            {labelId:"Performa Tinggi",labelEn:"High Performance Engine",km:12000}
+        ],
+
+        fuel_hose: [
+            {labelId:"Selang Karet Standar",labelEn:"Standard Rubber Hose",km:40000},
+            {labelId:"Selang Fuel Injection",labelEn:"Fuel Injection Hose",km:60000}
+        ],
+
+        caliper_seal: [
+            {labelId:"Seal Kaliper Standar",labelEn:"Standard Caliper Seal",km:30000},
+            {labelId:"Seal Kaliper OEM",labelEn:"OEM Caliper Seal",km:50000}
+        ],
+
+        intake_rubber: [
+            {labelId:"Karet Intake Standar",labelEn:"Standard Intake Rubber",km:40000},
+            {labelId:"Karet Intake OEM",labelEn:"OEM Intake Rubber",km:60000}
+        ],
+
+        bulb: [
+            {labelId:"Bohlam Halogen",labelEn:"Halogen Bulb",km:20000},
+            {labelId:"Lampu LED",labelEn:"LED Lamp",km:50000}
+        ],
+
+        swingarm_bearing: [
+            {labelId:"Bearing Swing Arm Standar",labelEn:"Standard Swingarm Bearing",km:50000},
+            {labelId:"Bearing Swing Arm OEM",labelEn:"OEM Swingarm Bearing",km:70000}
+        ],
+
+        carb_sync: [
+            {labelId:"Motor 2 Silinder",labelEn:"Twin Cylinder",km:12000},
+            {labelId:"Motor 4 Silinder",labelEn:"Four Cylinder",km:10000}
+        ],
+
+        carb_cleaning: [
+            {labelId:"Pemakaian Normal",labelEn:"Normal Usage",km:15000},
+            {labelId:"Jarang Dipakai",labelEn:"Infrequent Usage",km:8000}
+        ],
+
+        throttle_cable: [
+            {labelId:"Kabel Standar",labelEn:"Standard Cable",km:30000},
+            {labelId:"Kabel Heavy Duty",labelEn:"Heavy Duty Cable",km:50000}
+        ],
+
+        clutch_cable: [
+            {labelId:"Kabel Standar",labelEn:"Standard Cable",km:30000},
+            {labelId:"Kabel Heavy Duty",labelEn:"Heavy Duty Cable",km:50000}
+        ]
+    },
+    mobil: {
+        oil:         [{labelId:"Mineral (Standar)",labelEn:"Mineral (Standard)",km:5000},{labelId:"Semi Synthetic",labelEn:"Semi Synthetic",km:7500},{labelId:"Full Synthetic",labelEn:"Full Synthetic",km:10000},{labelId:"Minyak Goreng (Darurat!)",labelEn:"Cooking Oil (Emergency!)",km:1000}],
+        brake:       [{labelId:"Standar / OEM",labelEn:"Standard / OEM",km:30000},{labelId:"Soft Compound (Pakem)",labelEn:"Soft Compound",km:20000},{labelId:"Hard Compound (Awet)",labelEn:"Hard Compound",km:45000}],
+        trans:       [{labelId:"ATF / CVTF (Standar)",labelEn:"ATF / CVTF OEM",km:40000},{labelId:"Oli Transmisi Manual",labelEn:"Manual Gear Oil",km:40000},{labelId:"ATF Long Life",labelEn:"Long Life ATF",km:80000}],
+        general:     [{labelId:"Suku Cadang Asli",labelEn:"Genuine Part",km:40000},{labelId:"Suku Cadang Aftermarket",labelEn:"Aftermarket Part",km:30000}],
+        filter:      [{labelId:"Filter Kertas Standar",labelEn:"Standard Paper Filter",km:20000},{labelId:"Filter Udara Racing",labelEn:"Racing Air Filter",km:15000}],
+        sparkplug:   [{labelId:"Busi Standar (Nikel)",labelEn:"Standard Plug (Nickel)",km:20000},{labelId:"Busi Iridium / Platinum",labelEn:"Iridium / Platinum Plug",km:40000}],
+        coolant:     [{labelId:"Coolant Standar",labelEn:"Standard Coolant",km:40000},{labelId:"Coolant Long Life",labelEn:"Long Life Coolant",km:80000},{labelId:"Coolant Racing / OAT",labelEn:"Racing / OAT Coolant",km:60000}],
+        battery:     [{labelId:"Aki Basah (Standar)",labelEn:"Wet Battery (Standard)",km:30000},{labelId:"Aki Kering / MF",labelEn:"Dry / MF Battery",km:40000},{labelId:"Aki AGM / EFB",labelEn:"AGM / EFB Battery",km:60000}],
+        timing:      [{labelId:"Timing Belt (Standar)",labelEn:"Standard Timing Belt",km:60000},{labelId:"Timing Belt (OEM)",labelEn:"OEM Timing Belt",km:80000},{labelId:"Timing Chain",labelEn:"Timing Chain",km:100000}],
+        cabin_filter:[{labelId:"Filter Kabin Standar",labelEn:"Standard Cabin Filter",km:15000},{labelId:"Filter Kabin HEPA",labelEn:"HEPA Cabin Filter",km:20000},{labelId:"Filter Kabin Carbon Aktif",labelEn:"Activated Carbon Filter",km:10000}],
+        fuel_filter: [{labelId:"Filter Bensin Standar",labelEn:"Standard Fuel Filter",km:30000},{labelId:"Filter Solar (Diesel)",labelEn:"Diesel Fuel Filter",km:20000},{labelId:"Filter Bensin Premium",labelEn:"Premium Fuel Filter",km:40000}],
+        wiper:       [{labelId:"Wiper Konvensional",labelEn:"Conventional Wiper",km:20000},{labelId:"Wiper Flat / Frameless",labelEn:"Flat / Frameless Wiper",km:30000},{labelId:"Wiper Hybrid",labelEn:"Hybrid Wiper",km:25000}],
+        clutch:      [{labelId:"Kampas Kopling Standar",labelEn:"Standard Clutch Plate",km:60000},{labelId:"Kampas Kopling OEM",labelEn:"OEM Clutch Plate",km:80000},{labelId:"Kampas Kopling Racing",labelEn:"Racing Clutch Plate",km:40000}],
+        suspension:  [{labelId:"Shock Standar",labelEn:"Standard Shock Absorber",km:50000},{labelId:"Shock Gas",labelEn:"Gas Shock Absorber",km:80000},{labelId:"Shock Adjustable",labelEn:"Adjustable Shock Absorber",km:100000}],
+        brake_fluid: [{labelId:"Minyak Rem DOT 3",labelEn:"Brake Fluid DOT 3",km:20000},{labelId:"Minyak Rem DOT 4",labelEn:"Brake Fluid DOT 4",km:30000},{labelId:"Minyak Rem DOT 5.1",labelEn:"Brake Fluid DOT 5.1",km:40000}]
+    },
+    pikap: {
+        oil:         [{labelId:"Mineral (Standar)",labelEn:"Mineral (Standard)",km:5000},{labelId:"Semi Synthetic",labelEn:"Semi Synthetic",km:7500},{labelId:"Full Synthetic",labelEn:"Full Synthetic",km:10000},{labelId:"Oli Diesel",labelEn:"Diesel Engine Oil",km:5000}],
+        brake:       [{labelId:"Standar / OEM",labelEn:"Standard / OEM",km:25000},{labelId:"Hard Compound (Muatan Berat)",labelEn:"Hard Compound (Heavy Load)",km:35000}],
+        trans:       [{labelId:"Oli Gardan 4WD",labelEn:"4WD Differential Oil",km:30000},{labelId:"Oli Transmisi Manual",labelEn:"Manual Gear Oil",km:40000},{labelId:"ATF (Otomatis)",labelEn:"ATF (Automatic)",km:40000}],
+        general:     [{labelId:"Suku Cadang Asli",labelEn:"Genuine Part",km:40000},{labelId:"Suku Cadang Aftermarket",labelEn:"Aftermarket Part",km:30000}],
+        filter:      [{labelId:"Filter Udara Standar",labelEn:"Standard Air Filter",km:20000},{labelId:"Filter Udara Heavy Duty",labelEn:"Heavy Duty Air Filter",km:25000}],
+        sparkplug:   [{labelId:"Busi Standar (Nikel)",labelEn:"Standard Plug (Nickel)",km:20000},{labelId:"Busi Iridium / Platinum",labelEn:"Iridium / Platinum Plug",km:40000}],
+        coolant:     [{labelId:"Coolant Standar",labelEn:"Standard Coolant",km:40000},{labelId:"Coolant Heavy Duty",labelEn:"Heavy Duty Coolant",km:60000}],
+        battery:     [{labelId:"Aki Basah Standar",labelEn:"Standard Wet Battery",km:30000},{labelId:"Aki Kering / MF",labelEn:"Dry / MF Battery",km:40000}],
+        timing:      [{labelId:"Timing Belt (Standar)",labelEn:"Standard Timing Belt",km:60000},{labelId:"Timing Chain",labelEn:"Timing Chain",km:100000}],
+        fuel_filter: [{labelId:"Filter Bensin",labelEn:"Petrol Fuel Filter",km:30000},{labelId:"Filter Solar (Diesel)",labelEn:"Diesel Fuel Filter",km:20000}],
+        suspension:  [{labelId:"Shock Standar",labelEn:"Standard Shock Absorber",km:50000},{labelId:"Shock Heavy Duty",labelEn:"Heavy Duty Shock Absorber",km:80000}],
+        brake_fluid: [{labelId:"Minyak Rem DOT 3",labelEn:"Brake Fluid DOT 3",km:20000},{labelId:"Minyak Rem DOT 4",labelEn:"Brake Fluid DOT 4",km:30000}]
+    },
+    truk: {
+        oil:         [{labelId:"Oli Diesel CI-4 (Standar)",labelEn:"Diesel CI-4 (Standard)",km:10000},{labelId:"Oli Diesel CJ-4 / CK-4",labelEn:"Diesel CJ-4 / CK-4",km:15000},{labelId:"Oli Diesel Full Synthetic",labelEn:"Full Synthetic Diesel",km:20000}],
+        brake:       [{labelId:"Brake Drum Standar",labelEn:"Standard Brake Drum",km:40000},{labelId:"Brake Disc Heavy Duty",labelEn:"Heavy Duty Brake Disc",km:50000}],
+        trans:       [{labelId:"Oli Transmisi Manual Truk",labelEn:"Truck Manual Gear Oil",km:60000},{labelId:"Oli Gardan Truk",labelEn:"Truck Differential Oil",km:60000}],
+        general:     [{labelId:"Suku Cadang Asli",labelEn:"Genuine Part",km:60000},{labelId:"Suku Cadang Heavy Duty",labelEn:"Heavy Duty Part",km:50000}],
+        filter:      [{labelId:"Filter Udara Heavy Duty",labelEn:"Heavy Duty Air Filter",km:30000},{labelId:"Filter Udara Primary",labelEn:"Primary Air Filter",km:20000}],
+        sparkplug:   [{labelId:"Glow Plug Standar (Diesel)",labelEn:"Standard Glow Plug (Diesel)",km:30000},{labelId:"Glow Plug Premium",labelEn:"Premium Glow Plug",km:50000}],
+        coolant:     [{labelId:"Coolant Heavy Duty",labelEn:"Heavy Duty Coolant",km:60000},{labelId:"Coolant OAT Extended Life",labelEn:"OAT Extended Life Coolant",km:100000}],
+        battery:     [{labelId:"Aki Basah Heavy Duty",labelEn:"Heavy Duty Wet Battery",km:40000},{labelId:"Aki MF Heavy Duty",labelEn:"Heavy Duty MF Battery",km:60000}],
+        timing:      [{labelId:"Timing Chain Standar",labelEn:"Standard Timing Chain",km:150000},{labelId:"Timing Gear Set",labelEn:"Timing Gear Set",km:200000}],
+        fuel_filter: [{labelId:"Filter Solar Primer",labelEn:"Primary Diesel Fuel Filter",km:15000},{labelId:"Filter Solar Sekunder",labelEn:"Secondary Diesel Fuel Filter",km:30000}],
+        suspension:  [{labelId:"Pegas Daun (Leaf Spring)",labelEn:"Leaf Spring",km:80000},{labelId:"Shock Absorber Heavy Duty",labelEn:"Heavy Duty Shock Absorber",km:80000}],
+        brake_fluid: [{labelId:"Minyak Rem DOT 3",labelEn:"Brake Fluid DOT 3",km:20000},{labelId:"Minyak Rem DOT 4 Heavy Duty",labelEn:"Heavy Duty DOT 4 Brake Fluid",km:30000}]
+    }
+};
+
+const defaultComponents = {
+    motor: [
+        {id:'c1', nameId:'Oli Mesin',         nameEn:'Engine Oil',           icon:'fa-oil-can',          typeKey:'oil',         spec:'Standar Pabrik', interval:2000,  lastChangedAt:0},
+        {id:'c2', nameId:'Oli CVT / Gardan',   nameEn:'Gear Oil',             icon:'fa-gear',             typeKey:'trans',       spec:'Standar Pabrik', interval:8000,  lastChangedAt:0},
+        {id:'c3', nameId:'Kampas Rem',          nameEn:'Brake Pads',           icon:'fa-compact-disc',     typeKey:'brake',       spec:'Standar Pabrik', interval:12000, lastChangedAt:0},
+        {id:'c4', nameId:'Ban',                 nameEn:'Tires',                icon:'fa-circle-notch',     typeKey:'general',     spec:'Standar Pabrik', interval:15000, lastChangedAt:0},
+        {id:'c5', nameId:'V-Belt / Rantai',     nameEn:'Belt / Chain',         icon:'fa-infinity',         typeKey:'chain',       spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c6', nameId:'Filter Udara',        nameEn:'Air Filter',           icon:'fa-fan',              typeKey:'filter',      spec:'Standar Pabrik', interval:15000, lastChangedAt:0},
+        {id:'c7', nameId:'Busi',                nameEn:'Spark Plug',           icon:'fa-bolt',             typeKey:'sparkplug',   spec:'Standar Pabrik', interval:8000,  lastChangedAt:0},
+        {id:'c8', nameId:'Coolant',             nameEn:'Coolant',              icon:'fa-temperature-low',  typeKey:'coolant',     spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c9', nameId:'Aki',                 nameEn:'Battery',              icon:'fa-car-battery',      typeKey:'battery',     spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c10',nameId:'Filter BBM',          nameEn:'Fuel Filter',          icon:'fa-gas-pump',         typeKey:'fuel_filter', spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c11',nameId:'Oli Shockbreaker',    nameEn:'Fork Oil',             icon:'fa-arrows-up-down',   typeKey:'suspension',  spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c12',nameId:'Kampas Kopling',      nameEn:'Clutch Plates',        icon:'fa-circle-half-stroke',typeKey:'clutch',     spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c13',nameId:'Minyak Rem',          nameEn:'Brake Fluid',          icon:'fa-droplet',          typeKey:'brake_fluid', spec:'Standar Pabrik', interval:10000, lastChangedAt:0},
+        {id:'c14',nameId:'Filter Oli',            nameEn:'Oil Filter',             icon:'fa-filter',            typeKey:'oil_filter',       spec:'Standar Pabrik', interval:8000,  lastChangedAt:0},
+        {id:'c15',nameId:'Seal Shock Depan',      nameEn:'Fork Seal',              icon:'fa-water',             typeKey:'fork_seal',        spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c16',nameId:'Laher Setang',          nameEn:'Steering Bearing',       icon:'fa-compass',           typeKey:'steering_bearing', spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c17',nameId:'Bearing Roda',          nameEn:'Wheel Bearing',          icon:'fa-circle-dot',        typeKey:'wheel_bearing',    spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c18',nameId:'Stel Klep',             nameEn:'Valve Clearance',        icon:'fa-sliders',           typeKey:'valve_clearance',  spec:'Standar Pabrik', interval:24000, lastChangedAt:0},
+        {id:'c19',nameId:'Selang Bensin',         nameEn:'Fuel Hose',              icon:'fa-hose',             typeKey:'fuel_hose',        spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c20',nameId:'Seal Kaliper Rem',      nameEn:'Brake Caliper Seal',     icon:'fa-circle-stop',       typeKey:'caliper_seal',     spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c21',nameId:'Karet Intake',          nameEn:'Intake Manifold Rubber', icon:'fa-wave-square',       typeKey:'intake_rubber',    spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c22',nameId:'Bohlam Lampu',          nameEn:'Bulbs',                  icon:'fa-lightbulb',         typeKey:'bulb',             spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c23',nameId:'Bearing Swing Arm',     nameEn:'Swingarm Bearing',       icon:'fa-arrows-left-right', typeKey:'swingarm_bearing', spec:'Standar Pabrik', interval:50000, lastChangedAt:0},
+        {id:'c24',nameId:'Sinkronisasi Karburator', nameEn:'Carburetor Synchronization', icon:'fa-sliders', typeKey:'carb_sync', interval:12000, lastChangedAt:0},
+        {id:'c25',nameId:'Pembersihan Karburator',  nameEn:'Carburetor Cleaning',       icon:'fa-spray-can', typeKey:'carb_cleaning', interval:15000, lastChangedAt:0},
+        {id:'c26',nameId:'Throttle Cable',          nameEn:'Throttle Cable',            icon:'fa-link', typeKey:'throttle_cable', interval:30000, lastChangedAt:0},
+        {id:'c27',nameId:'Clutch Cable',            nameEn:'Clutch Cable',              icon:'fa-link', typeKey:'clutch_cable', interval:30000, lastChangedAt:0}
+    ],
+    mobil: [
+        {id:'c1', nameId:'Oli Mesin',           nameEn:'Engine Oil',           icon:'fa-oil-can',          typeKey:'oil',         spec:'Standar Pabrik', interval:5000,  lastChangedAt:0},
+        {id:'c2', nameId:'Oli Transmisi',        nameEn:'Transmission Fluid',   icon:'fa-gear',             typeKey:'trans',       spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c3', nameId:'Filter Oli',           nameEn:'Oil Filter',           icon:'fa-filter',           typeKey:'general',     spec:'Standar Pabrik', interval:10000, lastChangedAt:0},
+        {id:'c4', nameId:'Kampas Rem',           nameEn:'Brake Pads',           icon:'fa-compact-disc',     typeKey:'brake',       spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c5', nameId:'Ban',                  nameEn:'Tires',                icon:'fa-circle-notch',     typeKey:'general',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c6', nameId:'Filter Udara',         nameEn:'Air Filter',           icon:'fa-fan',              typeKey:'filter',      spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c7', nameId:'Busi',                 nameEn:'Spark Plug',           icon:'fa-bolt',             typeKey:'sparkplug',   spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c8', nameId:'Coolant / Air Radiator',nameEn:'Coolant',             icon:'fa-temperature-low',  typeKey:'coolant',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c9', nameId:'Aki',                  nameEn:'Battery',              icon:'fa-car-battery',      typeKey:'battery',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c10',nameId:'Timing Belt / Chain',  nameEn:'Timing Belt / Chain',  icon:'fa-link',             typeKey:'timing',      spec:'Standar Pabrik', interval:60000, lastChangedAt:0},
+        {id:'c11',nameId:'Filter Kabin / AC',    nameEn:'Cabin / AC Filter',    icon:'fa-snowflake',        typeKey:'cabin_filter',spec:'Standar Pabrik', interval:15000, lastChangedAt:0},
+        {id:'c12',nameId:'Filter BBM',           nameEn:'Fuel Filter',          icon:'fa-gas-pump',         typeKey:'fuel_filter', spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c13',nameId:'Wiper',                nameEn:'Wiper Blades',         icon:'fa-arrows-left-right',typeKey:'wiper',       spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c14',nameId:'Minyak Rem',           nameEn:'Brake Fluid',          icon:'fa-droplet',          typeKey:'brake_fluid', spec:'DOT 3',          interval:20000, lastChangedAt:0},
+        {id:'c15',nameId:'Shock Absorber',       nameEn:'Shock Absorber',       icon:'fa-arrows-up-down',   typeKey:'suspension',  spec:'Standar Pabrik', interval:50000, lastChangedAt:0},
+        {id:'c16',nameId:'Kampas Kopling',       nameEn:'Clutch Plate',         icon:'fa-circle-half-stroke',typeKey:'clutch',     spec:'Standar Pabrik', interval:60000, lastChangedAt:0}
+    ],
+    pikap: [
+        {id:'c1', nameId:'Oli Mesin',            nameEn:'Engine Oil',           icon:'fa-oil-can',          typeKey:'oil',         spec:'Standar Pabrik', interval:5000,  lastChangedAt:0},
+        {id:'c2', nameId:'Oli Transmisi / Gardan',nameEn:'Trans / Differential Oil',icon:'fa-gear',          typeKey:'trans',       spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c3', nameId:'Filter Oli',           nameEn:'Oil Filter',           icon:'fa-filter',           typeKey:'general',     spec:'Standar Pabrik', interval:10000, lastChangedAt:0},
+        {id:'c4', nameId:'Kampas Rem',           nameEn:'Brake Pads / Drum',    icon:'fa-compact-disc',     typeKey:'brake',       spec:'Standar Pabrik', interval:25000, lastChangedAt:0},
+        {id:'c5', nameId:'Ban',                  nameEn:'Tires',                icon:'fa-circle-notch',     typeKey:'general',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c6', nameId:'Filter Udara',         nameEn:'Air Filter',           icon:'fa-fan',              typeKey:'filter',      spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c7', nameId:'Busi',                 nameEn:'Spark Plug',           icon:'fa-bolt',             typeKey:'sparkplug',   spec:'Standar Pabrik', interval:20000, lastChangedAt:0},
+        {id:'c8', nameId:'Coolant',              nameEn:'Coolant',              icon:'fa-temperature-low',  typeKey:'coolant',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c9', nameId:'Aki',                  nameEn:'Battery',              icon:'fa-car-battery',      typeKey:'battery',     spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c10',nameId:'Timing Belt / Chain',  nameEn:'Timing Belt / Chain',  icon:'fa-link',             typeKey:'timing',      spec:'Standar Pabrik', interval:60000, lastChangedAt:0},
+        {id:'c11',nameId:'Filter BBM',           nameEn:'Fuel Filter',          icon:'fa-gas-pump',         typeKey:'fuel_filter', spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c12',nameId:'Shock Absorber',       nameEn:'Shock Absorber',       icon:'fa-arrows-up-down',   typeKey:'suspension',  spec:'Standar Pabrik', interval:50000, lastChangedAt:0},
+        {id:'c13',nameId:'Minyak Rem',           nameEn:'Brake Fluid',          icon:'fa-droplet',          typeKey:'brake_fluid', spec:'DOT 3',          interval:20000, lastChangedAt:0}
+    ],
+    truk: [
+        {id:'c1', nameId:'Oli Mesin (Diesel)',   nameEn:'Engine Oil (Diesel)',   icon:'fa-oil-can',          typeKey:'oil',         spec:'CI-4 Standar',   interval:10000, lastChangedAt:0},
+        {id:'c2', nameId:'Oli Transmisi / Gardan',nameEn:'Trans / Differential Oil',icon:'fa-gear',          typeKey:'trans',       spec:'Standar Pabrik', interval:60000, lastChangedAt:0},
+        {id:'c3', nameId:'Filter Oli',           nameEn:'Oil Filter',           icon:'fa-filter',           typeKey:'general',     spec:'Standar Pabrik', interval:10000, lastChangedAt:0},
+        {id:'c4', nameId:'Kampas Rem (Drum)',     nameEn:'Brake Drum / Linings', icon:'fa-compact-disc',     typeKey:'brake',       spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c5', nameId:'Ban',                  nameEn:'Tires',                icon:'fa-circle-notch',     typeKey:'general',     spec:'Standar Pabrik', interval:60000, lastChangedAt:0},
+        {id:'c6', nameId:'Filter Udara',         nameEn:'Air Filter',           icon:'fa-fan',              typeKey:'filter',      spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c7', nameId:'Glow Plug',            nameEn:'Glow Plug',            icon:'fa-bolt',             typeKey:'sparkplug',   spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c8', nameId:'Coolant',              nameEn:'Coolant',              icon:'fa-temperature-low',  typeKey:'coolant',     spec:'Heavy Duty',     interval:60000, lastChangedAt:0},
+        {id:'c9', nameId:'Aki',                  nameEn:'Battery',              icon:'fa-car-battery',      typeKey:'battery',     spec:'Standar Pabrik', interval:40000, lastChangedAt:0},
+        {id:'c10',nameId:'Timing Chain / Gear',  nameEn:'Timing Chain / Gear',  icon:'fa-link',             typeKey:'timing',      spec:'Standar Pabrik', interval:150000,lastChangedAt:0},
+        {id:'c11',nameId:'Filter Solar (Primer)', nameEn:'Primary Fuel Filter',  icon:'fa-gas-pump',         typeKey:'fuel_filter', spec:'Standar Pabrik', interval:15000, lastChangedAt:0},
+        {id:'c12',nameId:'Filter Solar (Sekunder)',nameEn:'Secondary Fuel Filter',icon:'fa-gas-pump',        typeKey:'fuel_filter', spec:'Standar Pabrik', interval:30000, lastChangedAt:0},
+        {id:'c13',nameId:'Pegas / Shock Absorber',nameEn:'Spring / Shock Absorber',icon:'fa-arrows-up-down', typeKey:'suspension',  spec:'Standar Pabrik', interval:80000, lastChangedAt:0},
+        {id:'c14',nameId:'Minyak Rem',           nameEn:'Brake Fluid',          icon:'fa-droplet',          typeKey:'brake_fluid', spec:'DOT 4',          interval:20000, lastChangedAt:0}
+    ]
+};
 
         // --- APP STATE ---
-        let appData = {
-            lang: 'id',
-            activeVehicleIndex: 0,
-            vehicles: []
-        };
-        
+        let appData = { lang: 'id', activeVehicleIndex: 0, currentView: 'dashboard', vehicles: [] };
         let currentReplaceCompId = null;
+        let editingVehicleId = null;
+        const STORAGE_KEY = 'autotrack_pro_data';
+
+        const t = (key) => i18n[appData.lang][key];
+
+        function saveState() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch(e){}
+        }
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.vehicles)) {
+                        appData = Object.assign({lang:'id',activeVehicleIndex:0,currentView:'dashboard',vehicles:[]}, parsed);
+                        // backfill missing arrays
+                        appData.vehicles.forEach(v => {
+                            v.history = v.history || []; v.fuelLogs = v.fuelLogs || []; v.documents = v.documents || [];
+                            v.startOdo = (v.startOdo !== undefined) ? v.startOdo : v.odometer;
+                        });
+                    }
+                }
+            } catch(e){}
+        }
 
         function initApp() {
+            loadState();
+            document.getElementById('btnLang').innerText = appData.lang === 'id' ? 'EN' : 'ID';
             applyLangText();
             renderMain();
         }
-
-        const t = (key) => i18n[appData.lang][key];
 
         function toggleLang() {
             appData.lang = appData.lang === 'id' ? 'en' : 'id';
             document.getElementById('btnLang').innerText = appData.lang === 'id' ? 'EN' : 'ID';
             applyLangText();
             renderMain();
+            saveState();
         }
 
         function applyLangText() {
-            document.getElementById('lblSubtitle').innerText = t('subtitle');
-            
-            // Add Modal
-            document.getElementById('mAddTitle').innerText = t('mAddTitle');
-            document.getElementById('mAddDesc').innerText = t('mAddDesc');
-            document.getElementById('lblType').innerText = t('lblType');
-            document.getElementById('lblBrand').innerText = t('lblBrand');
-            document.getElementById('lblModel').innerText = t('lblModel');
-            document.getElementById('lblOdo').innerText = t('lblOdo');
-            document.getElementById('btnCancelAdd').innerText = t('btnCancel');
-            document.getElementById('btnSaveAdd').innerText = t('btnSave');
-            
-            // Trip Modal
-            document.getElementById('mTripTitle').innerText = t('mTripTitle');
-            document.getElementById('mTripDesc').innerText = t('mTripDesc');
-            document.getElementById('lblTripInput').innerText = t('lblTripInput');
-            document.getElementById('btnCancelTrip').innerText = t('btnCancel');
-            document.getElementById('btnSaveTrip').innerText = t('btnSave');
-
-            // Replace Modal
-            document.getElementById('mReplaceTitle').innerText = t('mReplaceTitle');
-            document.getElementById('mReplaceDesc').innerText = t('mReplaceDesc');
-            document.getElementById('lblRepQuality').innerText = t('lblRepQuality');
-            document.getElementById('lblRepNote').innerText = t('lblRepNote');
-            document.getElementById('btnCancelRep').innerText = t('btnCancel');
-            document.getElementById('btnSaveRep').innerText = t('btnSave');
-
-            // Recommendation Modal
-            if(document.getElementById('mRecTitle')) {
-                document.getElementById('mRecTitle').innerText = t('mRecTitle');
-                document.getElementById('mRecDesc').innerText = t('mRecDesc');
-                document.getElementById('btnRecClose').innerText = t('btnRecClose');
-            }
-
-            // Dropdown
-            document.getElementById('lblSave').innerText = t('lblSave');
-            document.getElementById('lblLoad').innerText = t('lblLoad');
-            document.getElementById('lblShare').innerText = t('lblShare');
-
+            const setT = (id, key) => { const el = document.getElementById(id); if(el) el.innerText = t(key); };
+            setT('lblSubtitle','subtitle');
+            setT('mAddTitle','mAddTitle'); setT('mAddDesc','mAddDesc'); setT('lblType','lblType');
+            setT('lblBrand','lblBrand'); setT('lblModel','lblModel'); setT('lblOdo','lblOdo');
+            setT('lblPlate','lblPlate'); setT('lblYear','lblYear');
+            setT('btnCancelAdd','btnCancel'); setT('btnSaveAdd','btnSave');
+            setT('mTripTitle','mTripTitle'); setT('mTripDesc','mTripDesc'); setT('lblTripInput','lblTripInput');
+            setT('btnCancelTrip','btnCancel'); setT('btnSaveTrip','btnSave');
+            setT('mReplaceTitle','mReplaceTitle'); setT('mReplaceDesc','mReplaceDesc'); setT('lblRepQuality','lblRepQuality');
+            setT('lblRepNote','lblRepNote'); setT('lblRepCost','lblRepCost'); setT('btnCancelRep','btnCancel'); setT('btnSaveRep','btnSave');
+            setT('mRecTitle','mRecTitle'); setT('mRecDesc','mRecDesc'); setT('btnRecClose','btnRecClose');
+            setT('lblSave','lblSave'); setT('lblLoad','lblLoad'); setT('lblShare','lblShare'); setT('lblReset','lblReset');
+            setT('navDash','navDash'); setT('navHist','navHist'); setT('navFuel','navFuel'); setT('navStats','navStats');
+            setT('mFuelTitle','mFuelTitle'); setT('mFuelDesc','mFuelDesc'); setT('lblFuelLiters','lblFuelLiters');
+            setT('lblFuelCost','lblFuelCost'); setT('lblFuelFull','lblFuelFull'); setT('btnCancelFuel','btnCancel'); setT('btnSaveFuel','btnSave');
+            setT('mDocTitle','mDocTitle'); setT('mDocDesc','mDocDesc'); setT('lblDocName','lblDocName');
+            setT('lblDocDate','lblDocDate'); setT('btnCancelDoc','btnCancel'); setT('btnSaveDoc','btnSave');
             const typeSelect = document.getElementById('vType');
-            typeSelect.options[0].text = t('typeMotor');
-            typeSelect.options[1].text = t('typeCar');
+            typeSelect.options[0].text = t('typeMotor'); typeSelect.options[1].text = t('typeCar');
+            const docSel = document.getElementById('docName');
+            docSel.options[0].text = t('docPajak'); docSel.options[1].text = t('docStnk5');
+            docSel.options[2].text = t('docAsuransi'); docSel.options[3].text = t('docSim'); docSel.options[4].text = t('docKir');
         }
 
+        const fmt = (n) => Number(n).toLocaleString('id-ID');
+        const fmtRp = (n) => 'Rp ' + Number(n||0).toLocaleString('id-ID');
+
+        // --- VIEW SWITCHING ---
+        function switchView(view) {
+            appData.currentView = view;
+            updateNavStyles();
+            renderMain();
+            saveState();
+        }
+        function updateNavStyles() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const active = btn.getAttribute('data-nav') === appData.currentView;
+                btn.classList.toggle('text-brand', active);
+                btn.classList.toggle('text-slate-400', !active);
+            });
+        }
+
+        // --- MAIN RENDER ---
         function renderMain() {
             const container = document.getElementById('mainContent');
+            const nav = document.getElementById('bottomNav');
+
             if (appData.vehicles.length === 0) {
-                // RENDER EMPTY STATE
+                nav.classList.add('hidden');
                 container.innerHTML = `
-                    <div class="flex-grow flex flex-col items-center justify-center text-center px-4 h-full">
+                    <div class="flex-grow flex flex-col items-center justify-center text-center px-4 h-full view-enter">
                         <div class="w-24 h-24 bg-white border border-slate-200 rounded-full flex items-center justify-center mb-6 shadow-sm">
                             <i class="fa-solid fa-car-side text-4xl text-slate-400"></i>
                         </div>
                         <h2 class="text-2xl font-bold mb-2 text-slate-800">${t('emptyTitle')}</h2>
                         <p class="text-slate-500 mb-8 max-w-xs">${t('emptyDesc')}</p>
-                        <button onclick="openModal('addVehicleModal')" class="bg-brand hover:bg-brandHover text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg shadow-blue-500/30">
-                        ${t('btnAdd')}
-                    </button>
-                </div>
-            `;
-        } else {
-            // RENDER DASHBOARD
-            
-            // -- VEHICLE SELECTOR TABS --
+                        <button onclick="openAddVehicle()" class="bg-brand hover:bg-brandHover text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg shadow-blue-500/30">${t('btnAdd')}</button>
+                    </div>`;
+                return;
+            }
+
+            nav.classList.remove('hidden');
+            updateNavStyles();
+
+            // Vehicle tabs (shown on all views)
             let vehicleTabs = '<div class="flex overflow-x-auto gap-2 pb-2 mb-4 hide-scrollbar w-full">';
             appData.vehicles.forEach((v, index) => {
                 const isActive = index === appData.activeVehicleIndex;
-                const btnClass = isActive 
-                    ? 'bg-brand text-white shadow-md shadow-blue-500/20' 
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50';
+                const btnClass = isActive ? 'bg-brand text-white shadow-md shadow-blue-500/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50';
                 vehicleTabs += `<button onclick="switchVehicle(${index})" class="px-4 py-2 rounded-full whitespace-nowrap text-sm font-semibold transition flex-shrink-0 ${btnClass}">${v.brand} ${v.model}</button>`;
             });
-            vehicleTabs += `<button onclick="openModal('addVehicleModal')" class="px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium border-2 border-dashed border-slate-300 text-slate-500 hover:bg-slate-50 hover:border-brand hover:text-brand transition flex-shrink-0 flex items-center gap-1"><i class="fa-solid fa-plus"></i></button>`;
-            vehicleTabs += '</div>';
+            vehicleTabs += `<button onclick="openAddVehicle()" class="px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium border-2 border-dashed border-slate-300 text-slate-500 hover:bg-slate-50 hover:border-brand hover:text-brand transition flex-shrink-0 flex items-center gap-1"><i class="fa-solid fa-plus"></i></button></div>`;
 
-            const vehicle = appData.vehicles[appData.activeVehicleIndex];
-            
-            let compsHtml = '';
-                vehicle.components.forEach(comp => {
-                    const usage = vehicle.odometer - comp.lastChangedAt;
-                    let progressPercent = (usage / comp.interval) * 100;
-                    if (progressPercent > 100) progressPercent = 100;
-                    
-                    const remainingKm = comp.interval - usage;
-                    const isOverdue = remainingKm <= 0;
-                    
-                    let barColor = 'bg-success';
-                    let statusText = t('statusGood');
-                    let statusColor = 'text-success';
+            let body = '';
+            switch(appData.currentView) {
+                case 'history': body = renderHistory(); break;
+                case 'fuel': body = renderFuel(); break;
+                case 'stats': body = renderStats(); break;
+                default: body = renderDashboard();
+            }
 
-                    if (progressPercent >= 90) {
-                        barColor = 'bg-danger';
-                        statusText = t('statusCrit');
-                        statusColor = 'text-danger';
-                    } else if (progressPercent >= 70) {
-                        barColor = 'bg-warning';
-                        statusText = t('statusWarn');
-                        statusColor = 'text-warning';
-                    }
+            container.innerHTML = vehicleTabs + `<div class="view-enter">${body}</div>`;
 
-                    const compName = appData.lang === 'id' ? comp.nameId : comp.nameEn;
-                    const prefix = isOverdue ? t('over') : t('left');
-                    const valColor = isOverdue ? 'text-danger' : 'text-slate-700';
-
-                    compsHtml += `
-                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
-                            <div class="flex justify-between items-start mb-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-100">
-                                        <i class="fa-solid ${comp.icon} text-lg"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-semibold text-slate-800 text-sm">${compName}</h4>
-                                        <p class="text-[10px] text-slate-400 max-w-[150px] truncate" title="${comp.spec}">${comp.spec}</p>
-                                    </div>
-                                </div>
-                                <button onclick="openReplaceModal('${comp.id}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-brand transition border border-slate-200" title="Ganti / Servis">
-                                    <i class="fa-solid fa-wrench text-xs"></i>
-                                </button>
-                            </div>
-
-                            <div class="mt-4">
-                                <div class="flex justify-between text-xs mb-1.5 font-medium">
-                                    <span class="${statusColor}">${statusText}</span>
-                                    <span class="font-mono text-slate-500">
-                                        ${prefix} <span class="${valColor}">${Math.abs(remainingKm).toLocaleString('id-ID')} KM</span>
-                                    </span>
-                                </div>
-                                <div class="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                                    <div class="h-full ${barColor} progress-bar-fill rounded-full" style="width: 0%" data-target-width="${progressPercent}%"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono">
-                                    <span>0</span>
-                                    <span>Max: ${comp.interval.toLocaleString('id-ID')}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-
-            container.innerHTML = `
-                ${vehicleTabs}
-                <!-- Vehicle Card -->
-                <div class="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-5 border border-slate-200 shadow-md relative overflow-hidden mb-6">
-                    <div class="absolute -right-4 -top-4 text-slate-100 opacity-80">
-                            <i class="fa-solid ${vehicle.type === 'mobil' ? 'fa-car' : 'fa-motorcycle'} text-9xl"></i>
-                        </div>
-                        
-                        <div class="relative z-10">
-                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100">
-                                ${t('activeBadge')}
-                            </span>
-                            <div class="flex justify-between items-start mt-3 mb-6">
-                                <div>
-                                    <h2 class="text-2xl font-bold mb-0 text-slate-900">${vehicle.brand}</h2>
-                                    <p class="text-lg text-slate-600">${vehicle.model}</p>
-                                </div>
-                            </div>
-
-                            <div class="bg-white/70 rounded-xl p-4 flex justify-between items-end border border-slate-100 shadow-sm backdrop-blur-sm">
-                                <div>
-                                    <p class="text-[10px] text-slate-500 mb-1 uppercase tracking-wider font-semibold">${t('totalOdo')}</p>
-                                    <div class="flex items-baseline gap-1">
-                                        <span class="text-3xl font-mono font-bold text-slate-800">${vehicle.odometer.toLocaleString('id-ID')}</span>
-                                        <span class="text-sm text-slate-400 font-mono">KM</span>
-                                    </div>
-                                </div>
-                                <button onclick="openModal('tripModal')" class="bg-brand hover:bg-brandHover text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-blue-500/30 flex items-center gap-2">
-                                    ${t('btnTrip')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Components Grid -->
-                    <div>
-                        <div class="flex justify-between items-end mb-4 px-1">
-                            <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-layer-group mr-2 text-slate-400"></i>${t('statusTitle')}</h3>
-                            <span class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold">${t('statusDesc')}</span>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${compsHtml}
-                        </div>
-                    </div>
-                `;
-
-                // Animate bars
+            if (appData.currentView === 'dashboard') {
                 setTimeout(() => {
                     document.querySelectorAll('.progress-bar-fill').forEach(bar => {
                         bar.style.width = bar.getAttribute('data-target-width');
@@ -622,101 +718,339 @@
             }
         }
 
-        // --- NEW FEATURE: SERVICE RECOMMENDATION SYSTEM ---
-        function checkRecommendations() {
-            const vehicle = appData.vehicles[appData.activeVehicleIndex];
-            const listContainer = document.getElementById('recList');
-            listContainer.innerHTML = '';
-            let needsWarning = false;
+        function computeHealth(vehicle) {
+            // average remaining % across components (capped 0-100)
+            let total = 0;
+            vehicle.components.forEach(c => {
+                const usage = vehicle.odometer - c.lastChangedAt;
+                let remaining = 100 - (usage / c.interval) * 100;
+                if (remaining < 0) remaining = 0;
+                if (remaining > 100) remaining = 100;
+                total += remaining;
+            });
+            return Math.round(total / vehicle.components.length);
+        }
 
+        // --- DASHBOARD ---
+        function renderDashboard() {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            const health = computeHealth(vehicle);
+            let healthColor = '#10B981';
+            if (health < 40) healthColor = '#EF4444'; else if (health < 70) healthColor = '#F59E0B';
+            const circ = 2 * Math.PI * 26;
+            const offset = circ - (health/100)*circ;
+
+            let compsHtml = '';
             vehicle.components.forEach(comp => {
                 const usage = vehicle.odometer - comp.lastChangedAt;
                 let progressPercent = (usage / comp.interval) * 100;
-                
-                // Trigger warning if component usage is 90% or more
-                if (progressPercent >= 90) {
-                    needsWarning = true;
-                    const compName = appData.lang === 'id' ? comp.nameId : comp.nameEn;
-                    const remainingKm = comp.interval - usage;
-                    const isOver = remainingKm <= 0;
-                    
-                    // Format text safely
-                    const statusText = isOver 
-                                     ? `${t('over')} ${Math.abs(remainingKm).toLocaleString('id-ID')} KM`
-                                     : `${t('left')} ${remainingKm.toLocaleString('id-ID')} KM`;
-                    const textColor = isOver ? 'text-danger' : 'text-warning';
-                    const iconColor = isOver ? 'text-danger' : 'text-warning';
-
-                    listContainer.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                if (progressPercent > 100) progressPercent = 100;
+                const remainingKm = comp.interval - usage;
+                const isOverdue = remainingKm <= 0;
+                let barColor = 'bg-success', statusText = t('statusGood'), statusColor = 'text-success';
+                if (progressPercent >= 90) { barColor='bg-danger'; statusText=t('statusCrit'); statusColor='text-danger'; }
+                else if (progressPercent >= 70) { barColor='bg-warning'; statusText=t('statusWarn'); statusColor='text-warning'; }
+                const compName = appData.lang === 'id' ? comp.nameId : comp.nameEn;
+                const prefix = isOverdue ? t('over') : t('left');
+                const valColor = isOverdue ? 'text-danger' : 'text-slate-700';
+                compsHtml += `
+                    <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center ${iconColor}">
-                                    <i class="fa-solid ${comp.icon} text-sm"></i>
-                                </div>
+                                <div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-100"><i class="fa-solid ${comp.icon} text-lg"></i></div>
                                 <div>
-                                    <p class="text-sm font-bold text-slate-800">${compName}</p>
-                                    <p class="text-[10px] font-mono font-medium ${textColor}">${statusText}</p>
+                                    <h4 class="font-semibold text-slate-800 text-sm">${compName}</h4>
+                                    <p class="text-[10px] text-slate-400 max-w-[150px] truncate" title="${comp.spec}">${comp.spec}</p>
                                 </div>
                             </div>
-                            <button onclick="closeModal('recommendationModal'); setTimeout(() => openReplaceModal('${comp.id}'), 350);" class="px-4 py-2 bg-brand hover:bg-brandHover text-white text-xs font-semibold rounded-lg transition shadow-sm shadow-blue-500/20">
-                                ${t('btnRecFix')}
-                            </button>
+                            <button onclick="openReplaceModal('${comp.id}')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-brand transition border border-slate-200"><i class="fa-solid fa-wrench text-xs"></i></button>
                         </div>
-                    `;
-                }
+                        <div class="mt-4">
+                            <div class="flex justify-between text-xs mb-1.5 font-medium">
+                                <span class="${statusColor}">${statusText}</span>
+                                <span class="font-mono text-slate-500">${prefix} <span class="${valColor}">${fmt(Math.abs(remainingKm))} KM</span></span>
+                            </div>
+                            <div class="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full ${barColor} progress-bar-fill rounded-full" style="width: 0%" data-target-width="${progressPercent}%"></div>
+                            </div>
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1 font-mono"><span>0</span><span>Max: ${fmt(comp.interval)}</span></div>
+                        </div>
+                    </div>`;
             });
 
-            if (needsWarning) {
-            // Wait slightly for Trip Modal to fully close before opening Recommendation Modal
-            setTimeout(() => {
-                openModal('recommendationModal');
-            }, 400); 
+            // Documents preview on dashboard
+            let docHtml = renderDocsInline(vehicle);
+
+            return `
+                <div class="bg-gradient-to-br from-white to-slate-50 rounded-2xl p-5 border border-slate-200 shadow-md relative overflow-hidden mb-6">
+                    <div class="absolute -right-4 -top-4 text-slate-100 opacity-80"><i class="fa-solid ${vehicle.type === 'mobil' ? 'fa-car' : 'fa-motorcycle'} text-9xl"></i></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-center">
+                            <span class="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-full border border-blue-100">${t('activeBadge')}</span>
+                            <div class="flex gap-2">
+                                <button onclick="openEditVehicle()" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-brand transition shadow-sm"><i class="fa-solid fa-pen text-xs"></i></button>
+                                <button onclick="deleteVehicle()" class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-danger transition shadow-sm"><i class="fa-solid fa-trash text-xs"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start mt-3 mb-5">
+                            <div>
+                                <h2 class="text-2xl font-bold mb-0 text-slate-900">${vehicle.brand}</h2>
+                                <p class="text-lg text-slate-600 leading-tight">${vehicle.model}</p>
+                                <div class="flex items-center gap-2 mt-1">
+                                    ${vehicle.plate ? `<span class="text-[11px] font-mono font-bold bg-slate-800 text-white px-2 py-0.5 rounded">${vehicle.plate}</span>` : ''}
+                                    ${vehicle.year ? `<span class="text-[11px] text-slate-400 font-medium">${vehicle.year}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="relative flex-shrink-0">
+                                <svg width="64" height="64" viewBox="0 0 64 64" class="-rotate-90">
+                                    <circle cx="32" cy="32" r="26" fill="none" stroke-width="7" class="ring-bg"/>
+                                    <circle cx="32" cy="32" r="26" fill="none" stroke="${healthColor}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset 1s ease"/>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-base font-bold" style="color:${healthColor}">${health}</span>
+                                    <span class="text-[7px] text-slate-400 font-semibold uppercase">${t('healthScore')}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white/70 rounded-xl p-4 flex justify-between items-end border border-slate-100 shadow-sm backdrop-blur-sm">
+                            <div>
+                                <p class="text-[10px] text-slate-500 mb-1 uppercase tracking-wider font-semibold">${t('totalOdo')}</p>
+                                <div class="flex items-baseline gap-1"><span class="text-3xl font-mono font-bold text-slate-800">${fmt(vehicle.odometer)}</span><span class="text-sm text-slate-400 font-mono">KM</span></div>
+                            </div>
+                            <button onclick="openModal('tripModal'); updateTripHint();" class="bg-brand hover:bg-brandHover text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-blue-500/30 flex items-center gap-2">${t('btnTrip')}</button>
+                        </div>
+                    </div>
+                </div>
+                ${docHtml}
+                <div>
+                    <div class="flex justify-between items-end mb-4 px-1">
+                        <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-layer-group mr-2 text-slate-400"></i>${t('statusTitle')}</h3>
+                        <span class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold">${t('statusDesc')}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">${compsHtml}</div>
+                </div>`;
         }
-    }
 
-    function switchVehicle(index) {
-        appData.activeVehicleIndex = index;
-        renderMain();
-    }
+        function renderDocsInline(vehicle) {
+            const docNames = { pajak:t('docPajak'), stnk5:t('docStnk5'), asuransi:t('docAsuransi'), sim:t('docSim'), kir:t('docKir') };
+            let items = '';
+            (vehicle.documents||[]).forEach(d => {
+                const days = Math.ceil((new Date(d.expiryDate) - new Date()) / (1000*60*60*24));
+                let color = 'text-success', bg='bg-emerald-50 border-emerald-100', icon='fa-circle-check';
+                let label = `${days} ${t('docDays')}`;
+                if (days < 0) { color='text-danger'; bg='bg-red-50 border-red-100'; icon='fa-circle-xmark'; label=t('docExpired'); }
+                else if (days <= 30) { color='text-warning'; bg='bg-amber-50 border-amber-100'; icon='fa-triangle-exclamation'; }
+                items += `
+                    <div class="flex justify-between items-center p-3 ${bg} border rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid ${icon} ${color}"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-slate-700">${docNames[d.name]||d.name}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">${new Date(d.expiryDate).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold ${color}">${label}</span>
+                            <button onclick="deleteDoc('${d.id}')" class="text-slate-300 hover:text-danger transition"><i class="fa-solid fa-xmark text-xs"></i></button>
+                        </div>
+                    </div>`;
+            });
+            return `
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-file-shield mr-2 text-slate-400"></i>${t('docTitle')}</h3>
+                        <button onclick="openModal('docModal')" class="text-xs font-semibold text-brand hover:text-brandHover">${t('btnAddDoc')}</button>
+                    </div>
+                    ${items || `<p class="text-sm text-slate-400 text-center py-4 bg-white rounded-xl border border-slate-100">${t('docEmpty')}</p>`}
+                    <div class="space-y-2 mt-2"></div>
+                </div>`;
+        }
 
-    function saveNewVehicle() {
-        const brand = document.getElementById('vBrand').value || 'Brand';
+        // --- HISTORY VIEW ---
+        function renderHistory() {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            const hist = (vehicle.history||[]).slice().reverse();
+            let items = '';
+            if (hist.length === 0) {
+                items = `<div class="text-center py-16"><i class="fa-solid fa-clock-rotate-left text-4xl text-slate-300 mb-3"></i><p class="text-slate-400">${t('histEmpty')}</p></div>`;
+            } else {
+                hist.forEach(h => {
+                    items += `
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-brand border border-blue-100 flex-shrink-0"><i class="fa-solid ${h.icon} text-lg"></i></div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-semibold text-slate-800 text-sm">${h.name}</h4>
+                                    <span class="text-xs font-mono font-bold text-slate-500">${fmt(h.odometer)} KM</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 mt-0.5">${h.spec}</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-[10px] text-slate-400 font-mono">${new Date(h.date).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}</span>
+                                    ${h.cost ? `<span class="text-xs font-bold text-emerald-600">${fmtRp(h.cost)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+            return `<div class="mb-2 px-1"><h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-clock-rotate-left mr-2 text-slate-400"></i>${t('histTitle')}</h3></div><div class="space-y-3 mt-4">${items}</div>`;
+        }
+
+        // --- FUEL VIEW ---
+        function renderFuel() {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            const logs = (vehicle.fuelLogs||[]).slice().reverse();
+            let items = '';
+            if (logs.length === 0) {
+                items = `<div class="text-center py-16"><i class="fa-solid fa-gas-pump text-4xl text-slate-300 mb-3"></i><p class="text-slate-400">${t('fuelEmpty')}</p></div>`;
+            } else {
+                logs.forEach(l => {
+                    const effStr = l.efficiency ? `${l.efficiency.toFixed(1)} km/L` : '—';
+                    items += `
+                        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center text-warning border border-amber-100"><i class="fa-solid fa-gas-pump text-lg"></i></div>
+                                    <div>
+                                        <h4 class="font-semibold text-slate-800 text-sm">${l.liters.toFixed(2)} L ${l.full?'<i class="fa-solid fa-circle-check text-success text-[9px] ml-1"></i>':''}</h4>
+                                        <p class="text-[10px] text-slate-400 font-mono">${fmt(l.odometer)} KM • ${new Date(l.date).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-bold text-emerald-600">${fmtRp(l.cost)}</p>
+                                    <p class="text-[11px] font-mono font-semibold text-brand">${effStr}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+            return `
+                <div class="flex justify-between items-center mb-4 px-1">
+                    <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-gas-pump mr-2 text-slate-400"></i>${t('fuelTitle')}</h3>
+                    <button onclick="openModal('fuelModal')" class="bg-brand hover:bg-brandHover text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-500/30">${t('btnAddFuel')}</button>
+                </div>
+                <div class="space-y-3">${items}</div>`;
+        }
+
+        // --- STATS VIEW ---
+        function renderStats() {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            const serviceCost = (vehicle.history||[]).reduce((s,h)=>s+(h.cost||0),0);
+            const fuelCost = (vehicle.fuelLogs||[]).reduce((s,l)=>s+(l.cost||0),0);
+            const total = serviceCost + fuelCost;
+            const fills = (vehicle.fuelLogs||[]).length;
+            const totalKm = vehicle.odometer - (vehicle.startOdo||0);
+            const health = computeHealth(vehicle);
+
+            // Avg efficiency
+            const effs = (vehicle.fuelLogs||[]).filter(l=>l.efficiency).map(l=>l.efficiency);
+            const avgEff = effs.length ? (effs.reduce((a,b)=>a+b,0)/effs.length) : null;
+            const lastEff = effs.length ? effs[effs.length-1] : null;
+
+            const card = (icon, color, label, val) => `
+                <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+                    <div class="w-9 h-9 rounded-lg ${color} flex items-center justify-center mb-3"><i class="fa-solid ${icon}"></i></div>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mb-1">${label}</p>
+                    <p class="text-lg font-bold text-slate-800">${val}</p>
+                </div>`;
+
+            return `
+                <div class="mb-4 px-1"><h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-chart-pie mr-2 text-slate-400"></i>${t('statsTitle')}</h3></div>
+                <div class="bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl p-5 text-white shadow-lg mb-4">
+                    <p class="text-xs uppercase tracking-wider font-semibold opacity-80">${t('totalSpent')}</p>
+                    <p class="text-3xl font-bold mt-1">${fmtRp(total)}</p>
+                    <div class="flex gap-4 mt-4 text-xs">
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-gas-pump opacity-70"></i><span>${fmtRp(fuelCost)}</span></div>
+                        <div class="flex items-center gap-1.5"><i class="fa-solid fa-wrench opacity-70"></i><span>${fmtRp(serviceCost)}</span></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    ${card('fa-heart-pulse','bg-rose-50 text-rose-500', t('healthScore'), health + ' / 100')}
+                    ${card('fa-bolt','bg-blue-50 text-brand', t('avgEff'), avgEff ? avgEff.toFixed(1)+' km/L' : t('noEff'))}
+                    ${card('fa-gauge','bg-emerald-50 text-success', t('lastEff'), lastEff ? lastEff.toFixed(1)+' km/L' : t('noEff'))}
+                    ${card('fa-droplet','bg-amber-50 text-warning', t('fillsCount'), fills + 'x')}
+                    ${card('fa-road','bg-indigo-50 text-indigo-500', t('totalKm'), fmt(totalKm)+' KM')}
+                    ${card('fa-screwdriver-wrench','bg-slate-100 text-slate-500', t('serviceSpent'), fmtRp(serviceCost))}
+                </div>`;
+        }
+
+        // --- ACTIONS ---
+        function switchVehicle(index) { appData.activeVehicleIndex = index; renderMain(); saveState(); }
+
+        function openAddVehicle() {
+            editingVehicleId = null;
+            document.getElementById('mAddTitle').innerText = t('mAddTitle');
+            document.getElementById('vBrand').value=''; document.getElementById('vModel').value='';
+            document.getElementById('vOdo').value=''; document.getElementById('vPlate').value='';
+            document.getElementById('vYear').value=''; document.getElementById('vType').value='motor';
+            document.getElementById('vType').disabled = false;
+            document.getElementById('vOdo').disabled = false;
+            openModal('addVehicleModal');
+        }
+
+        function openEditVehicle() {
+            const v = appData.vehicles[appData.activeVehicleIndex];
+            editingVehicleId = v.id;
+            document.getElementById('mAddTitle').innerText = t('editVehicle');
+            document.getElementById('vBrand').value = v.brand;
+            document.getElementById('vModel').value = v.model;
+            document.getElementById('vOdo').value = v.odometer;
+            document.getElementById('vPlate').value = v.plate||'';
+            document.getElementById('vYear').value = v.year||'';
+            document.getElementById('vType').value = v.type;
+            document.getElementById('vType').disabled = true; // can't change type after creation
+            openModal('addVehicleModal');
+        }
+
+        function saveNewVehicle() {
+            const brand = document.getElementById('vBrand').value || 'Brand';
             const model = document.getElementById('vModel').value || 'Model';
             const type = document.getElementById('vType').value;
             const odo = parseInt(document.getElementById('vOdo').value) || 0;
+            const plate = document.getElementById('vPlate').value.toUpperCase();
+            const year = document.getElementById('vYear').value;
+
+            if (editingVehicleId) {
+                const v = appData.vehicles.find(x=>x.id===editingVehicleId);
+                v.brand=brand; v.model=model; v.odometer=odo; v.plate=plate; v.year=year;
+                closeModal('addVehicleModal');
+                renderMain(); saveState(); showToast(t('msgVehUpdated'));
+                return;
+            }
 
             const comps = JSON.parse(JSON.stringify(defaultComponents[type]));
             comps.forEach(c => c.lastChangedAt = odo);
-
-            const newVehicle = {
-                id: 'v_' + Date.now(),
-                brand, model, type, odometer: odo, components: comps
-            };
-
-            appData.vehicles.push(newVehicle);
+            appData.vehicles.push({ id:'v_'+Date.now(), brand, model, type, odometer:odo, plate, year, startOdo:odo, components:comps, history:[], fuelLogs:[], documents:[] });
             appData.activeVehicleIndex = appData.vehicles.length - 1;
-
             closeModal('addVehicleModal');
-            document.getElementById('vBrand').value = '';
-            document.getElementById('vModel').value = '';
-            document.getElementById('vOdo').value = '';
-            
-            renderMain();
-            showToast("Kendaraan ditambahkan!");
+            renderMain(); saveState(); showToast(t('msgVehAdded'));
+        }
+
+        function deleteVehicle() {
+            if (!confirm(t('confirmDelete'))) return;
+            appData.vehicles.splice(appData.activeVehicleIndex, 1);
+            appData.activeVehicleIndex = 0;
+            appData.currentView = 'dashboard';
+            renderMain(); saveState(); showToast(t('msgVehDeleted'));
+        }
+
+        function updateTripHint() {
+            const v = appData.vehicles[appData.activeVehicleIndex];
+            const inp = document.getElementById('tripDistance');
+            const hint = document.getElementById('lblTripHint');
+            const update = () => {
+                const val = parseFloat(inp.value)||0;
+                hint.innerText = `${t('tripHint')} ${fmt(v.odometer + val)} KM`;
+            };
+            inp.oninput = update; update();
         }
 
         function saveTrip() {
             const val = parseFloat(document.getElementById('tripDistance').value);
             if (!val || val <= 0) return;
-
             appData.vehicles[appData.activeVehicleIndex].odometer += val;
             closeModal('tripModal');
             document.getElementById('tripDistance').value = '';
-            
-            renderMain();
-            showToast(t('msgTripSaved'));
-
-            // Run Recommendation Check after adding trip
+            renderMain(); saveState(); showToast(t('msgTripSaved'));
             checkRecommendations();
         }
 
@@ -724,142 +1058,177 @@
             currentReplaceCompId = compId;
             const vehicle = appData.vehicles[appData.activeVehicleIndex];
             const comp = vehicle.components.find(c => c.id === compId);
-            
-            // Populate select options based on type
             const sel = document.getElementById('repSelect');
             sel.innerHTML = '';
-            
-            const optionsDb = intervalDatabase[vehicle.type][comp.typeKey];
-            
-            optionsDb.forEach(opt => {
+            intervalDatabase[vehicle.type][comp.typeKey].forEach(opt => {
                 const label = appData.lang === 'id' ? opt.labelId : opt.labelEn;
-                const optEl = document.createElement('option');
-                optEl.value = opt.km;
-                optEl.text = `${label} (± ${opt.km.toLocaleString('id-ID')} KM)`;
-                // auto-select current interval if match
-                if (comp.interval === opt.km) optEl.selected = true;
-                sel.appendChild(optEl);
+                const o = document.createElement('option');
+                o.value = opt.km; o.text = `${label} (± ${fmt(opt.km)} KM)`;
+                if (comp.interval === opt.km) o.selected = true;
+                sel.appendChild(o);
             });
-
             document.getElementById('repNote').value = '';
+            document.getElementById('repCost').value = '';
             openModal('replaceModal');
         }
 
         function saveReplacement() {
             if(!currentReplaceCompId) return;
-
             const vehicle = appData.vehicles[appData.activeVehicleIndex];
             const comp = vehicle.components.find(c => c.id === currentReplaceCompId);
-            
             const sel = document.getElementById('repSelect');
-            const noteInput = document.getElementById('repNote').value.trim();
-            
-            // Extract label without the " (± XXX KM)" part for display
-            const rawLabelText = sel.options[sel.selectedIndex].text.split(' (')[0];
-
+            const note = document.getElementById('repNote').value.trim();
+            const cost = parseInt(document.getElementById('repCost').value) || 0;
+            const rawLabel = sel.options[sel.selectedIndex].text.split(' (')[0];
             comp.interval = parseInt(sel.value);
             comp.lastChangedAt = vehicle.odometer;
-            comp.spec = noteInput !== "" ? noteInput : rawLabelText;
-
+            comp.spec = note !== "" ? note : rawLabel;
+            // log history
+            vehicle.history.push({ id:'h_'+Date.now(), name: appData.lang==='id'?comp.nameId:comp.nameEn, icon:comp.icon, spec:comp.spec, odometer:vehicle.odometer, date:Date.now(), cost });
             closeModal('replaceModal');
-            renderMain();
-            showToast(t('msgReplaced'));
+            renderMain(); saveState(); showToast(t('msgReplaced'));
+        }
+
+        // --- FUEL ---
+        function saveFuel() {
+            const liters = parseFloat(document.getElementById('fuelLiters').value);
+            const cost = parseInt(document.getElementById('fuelCost').value) || 0;
+            const full = document.getElementById('fuelFull').checked;
+            if (!liters || liters <= 0) return;
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            // efficiency calc: distance since last FULL fill / liters of this fill
+            let efficiency = null;
+            const lastFull = [...(vehicle.fuelLogs||[])].reverse().find(l => l.full);
+            if (full && lastFull) {
+                const dist = vehicle.odometer - lastFull.odometer;
+                if (dist > 0) efficiency = dist / liters;
+            }
+            vehicle.fuelLogs.push({ id:'f_'+Date.now(), liters, cost, full, odometer:vehicle.odometer, date:Date.now(), efficiency });
+            document.getElementById('fuelLiters').value='';
+            document.getElementById('fuelCost').value='';
+            document.getElementById('fuelFull').checked = true;
+            closeModal('fuelModal');
+            renderMain(); saveState(); showToast(t('msgFuelSaved'));
+        }
+
+        // --- DOCUMENTS ---
+        function saveDoc() {
+            const name = document.getElementById('docName').value;
+            const date = document.getElementById('docDate').value;
+            if (!date) return;
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            vehicle.documents = vehicle.documents || [];
+            // replace existing same-name doc
+            vehicle.documents = vehicle.documents.filter(d => d.name !== name);
+            vehicle.documents.push({ id:'d_'+Date.now(), name, expiryDate:date });
+            document.getElementById('docDate').value='';
+            closeModal('docModal');
+            renderMain(); saveState(); showToast(t('msgDocSaved'));
+        }
+        function deleteDoc(id) {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            vehicle.documents = vehicle.documents.filter(d => d.id !== id);
+            renderMain(); saveState();
+        }
+
+        // --- RECOMMENDATIONS ---
+        function checkRecommendations() {
+            const vehicle = appData.vehicles[appData.activeVehicleIndex];
+            const listContainer = document.getElementById('recList');
+            listContainer.innerHTML = '';
+            let needsWarning = false;
+            vehicle.components.forEach(comp => {
+                const usage = vehicle.odometer - comp.lastChangedAt;
+                if ((usage / comp.interval) * 100 >= 90) {
+                    needsWarning = true;
+                    const compName = appData.lang === 'id' ? comp.nameId : comp.nameEn;
+                    const remainingKm = comp.interval - usage;
+                    const isOver = remainingKm <= 0;
+                    const statusText = isOver ? `${t('over')} ${fmt(Math.abs(remainingKm))} KM` : `${t('left')} ${fmt(remainingKm)} KM`;
+                    const c = isOver ? 'text-danger' : 'text-warning';
+                    listContainer.innerHTML += `
+                        <div class="flex justify-between items-center p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center ${c}"><i class="fa-solid ${comp.icon} text-sm"></i></div>
+                                <div><p class="text-sm font-bold text-slate-800">${compName}</p><p class="text-[10px] font-mono font-medium ${c}">${statusText}</p></div>
+                            </div>
+                            <button onclick="closeModal('recommendationModal'); setTimeout(() => openReplaceModal('${comp.id}'), 350);" class="px-4 py-2 bg-brand hover:bg-brandHover text-white text-xs font-semibold rounded-lg transition shadow-sm shadow-blue-500/20">${t('btnRecFix')}</button>
+                        </div>`;
+                }
+            });
+            if (needsWarning) setTimeout(() => openModal('recommendationModal'), 400);
         }
 
         // --- DATA MANAGEMENT ---
-        function toggleDataMenu() {
-            const menu = document.getElementById('dataMenu');
-            menu.classList.toggle('hidden');
-        }
-
+        function toggleDataMenu() { document.getElementById('dataMenu').classList.toggle('hidden'); }
         function exportData() {
-            const dataStr = JSON.stringify(appData);
-            const blob = new Blob([dataStr], { type: "application/json" });
+            const blob = new Blob([JSON.stringify(appData)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `AutoTrack_Backup_${Date.now()}.json`;
-            a.click();
+            a.href = url; a.download = `AutoTrack_Backup_${Date.now()}.json`; a.click();
             URL.revokeObjectURL(url);
         }
-
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const parsed = JSON.parse(e.target.result);
                     if (parsed && Array.isArray(parsed.vehicles)) {
-                        appData = parsed;
-                        applyLangText();
-                        renderMain();
-                        showToast(t('msgImportOk'));
-                    } else { throw new Error('Format Invalid'); }
-                } catch (err) {
-                    showToast(t('msgImportErr'));
-                }
+                        appData = Object.assign({lang:'id',activeVehicleIndex:0,currentView:'dashboard',vehicles:[]}, parsed);
+                        appData.vehicles.forEach(v => { v.history=v.history||[]; v.fuelLogs=v.fuelLogs||[]; v.documents=v.documents||[]; v.startOdo=v.startOdo!==undefined?v.startOdo:v.odometer; });
+                        document.getElementById('btnLang').innerText = appData.lang === 'id' ? 'EN' : 'ID';
+                        applyLangText(); renderMain(); saveState(); showToast(t('msgImportOk'));
+                    } else throw new Error('Invalid');
+                } catch (err) { showToast(t('msgImportErr')); }
             };
             reader.readAsText(file);
             event.target.value = '';
         }
-
         function shareData() {
-            const dataStr = JSON.stringify(appData);
-            const file = new File([dataStr], "AutoTrack_Data.json", { type: "application/json" });
-
+            const file = new File([JSON.stringify(appData)], "AutoTrack_Data.json", { type: "application/json" });
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                navigator.share({
-                    title: 'AutoTrack Backup',
-                    text: 'Data perawatan kendaraan saya (AutoTrack Pro)',
-                    files: [file]
-                }).then(() => showToast(t('msgShareOk')))
-                  .catch(() => {}); 
-            } else {
-                showToast(t('msgShareErr'));
-            }
+                navigator.share({ title:'AutoTrack Backup', text:'Data perawatan kendaraan saya', files:[file] })
+                    .then(() => showToast(t('msgShareOk'))).catch(()=>{});
+            } else showToast(t('msgShareErr'));
+        }
+        function resetAll() {
+            if (!confirm(t('confirmReset'))) return;
+            appData = { lang: appData.lang, activeVehicleIndex:0, currentView:'dashboard', vehicles:[] };
+            localStorage.removeItem(STORAGE_KEY);
+            renderMain();
         }
 
         // --- UTILS ---
         function openModal(id) {
             const modal = document.getElementById(id);
             const content = modal.querySelector('div');
-            modal.classList.remove('modal-inactive');
-            modal.classList.add('modal-active');
-            setTimeout(() => {
-                content.classList.remove('modal-content-inactive');
-                content.classList.add('modal-content-active');
-            }, 10);
+            modal.classList.remove('modal-inactive'); modal.classList.add('modal-active');
+            setTimeout(() => { content.classList.remove('modal-content-inactive'); content.classList.add('modal-content-active'); }, 10);
         }
-
         function closeModal(id) {
             const modal = document.getElementById(id);
             const content = modal.querySelector('div');
-            content.classList.remove('modal-content-active');
-            content.classList.add('modal-content-inactive');
-            setTimeout(() => {
-                modal.classList.remove('modal-active');
-                modal.classList.add('modal-inactive');
-            }, 300);
+            content.classList.remove('modal-content-active'); content.classList.add('modal-content-inactive');
+            setTimeout(() => { modal.classList.remove('modal-active'); modal.classList.add('modal-inactive'); }, 300);
         }
-
         let toastTimeout;
         function showToast(msg) {
             const toast = document.getElementById('toast');
             document.getElementById('toastMsg').innerText = msg;
-            
-            toast.classList.remove('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
+            toast.classList.remove('opacity-0','translate-y-[-20px]','pointer-events-none');
             clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-[-20px]', 'pointer-events-none');
-            }, 3000);
+            toastTimeout = setTimeout(() => toast.classList.add('opacity-0','translate-y-[-20px]','pointer-events-none'), 3000);
         }
 
-        // Initialize
-        window.onload = initApp;
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('dataMenu');
+            if (!menu.classList.contains('hidden') && !e.target.closest('.relative')) menu.classList.add('hidden');
+        });
 
+        window.onload = initApp;
     </script>
 </body>
 </html>
